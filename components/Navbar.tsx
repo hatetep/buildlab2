@@ -1,7 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const navLinks = ["Usługi", "Realizacje", "Cennik", "Blog", "Kontakt"];
+const navLinks = [
+  { label: "Usługi",    href: "/uslugi" },
+  { label: "Realizacje",href: "/realizacje" },
+  { label: "Cennik",    href: "/cennik" },
+  { label: "Blog",      href: "/blog" },
+  { label: "Kontakt",   href: "/kontakt" },
+];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -35,12 +41,9 @@ export default function Navbar() {
 
         <ul className="hidden md:flex items-center gap-8 text-sm text-slate-400" role="list">
           {navLinks.map(l => (
-            <li key={l}>
-              <a
-                href={`/${l.toLowerCase()}`}
-                className="hover:text-white transition-colors relative group"
-              >
-                {l}
+            <li key={l.href}>
+              <a href={l.href} className="hover:text-white transition-colors relative group">
+                {l.label}
                 <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-blue-400 transition-all duration-300 group-hover:w-full" aria-hidden="true" />
               </a>
             </li>
@@ -73,20 +76,11 @@ export default function Navbar() {
       {open && (
         <div id="mobile-menu" className="md:hidden border-t border-white/5 bg-[#040913]/95 px-6 py-4 flex flex-col gap-4">
           {navLinks.map(l => (
-            <a
-              key={l}
-              href={`/${l.toLowerCase()}`}
-              className="text-slate-300 hover:text-white py-1 transition-colors"
-              onClick={() => setOpen(false)}
-            >
-              {l}
+            <a key={l.href} href={l.href} className="text-slate-300 hover:text-white py-1 transition-colors" onClick={() => setOpen(false)}>
+              {l.label}
             </a>
           ))}
-          <a
-            href="/wycen-projekt"
-            className="mt-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white text-center"
-            onClick={() => setOpen(false)}
-          >
+          <a href="/wycen-projekt" className="mt-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white text-center" onClick={() => setOpen(false)}>
             Wycena projektu
           </a>
         </div>
