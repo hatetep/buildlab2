@@ -80,235 +80,223 @@ function Counter({ target, suffix }: { target: number; suffix: string }) {
   return <div ref={ref}>{value}{suffix}</div>;
 }
 
-/* ─── Hero 3D Network Graph (faithful to Stitch design) ──────────
-   Wireframe cube center + sphere nodes + glowing connection lines
-   Matches the node-network visualization from the Stitch mockup
+/* ─── Hero: Canvas 3D rotating sphere network ────────────────────
+   60fps requestAnimationFrame, Fibonacci sphere distribution,
+   perspective projection, depth-sorted rendering, shadowBlur glow.
+   Matches the Stitch "Ultra-Modern Digital Agency" node-network.
 ──────────────────────────────────────────────────────────────── */
+function HeroSphere() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef    = useRef<number>(0);
 
-// Node positions in SVG viewBox 0 0 460 420
-const NODES = [
-  // center hub
-  { id: "hub",  x: 230, y: 195, r: 14, color: "#3b82f6", glow: "rgba(59,130,246,0.8)",  pulse: "3s" },
-  // ring 1
-  { id: "n1",   x: 155, y: 130, r: 9,  color: "#818cf8", glow: "rgba(99,102,241,0.7)",  pulse: "4s" },
-  { id: "n2",   x: 300, y: 115, r: 10, color: "#6366f1", glow: "rgba(99,102,241,0.7)",  pulse: "3.5s" },
-  { id: "n3",   x: 340, y: 210, r: 7,  color: "#60a5fa", glow: "rgba(59,130,246,0.6)",  pulse: "5s" },
-  { id: "n4",   x: 295, y: 290, r: 9,  color: "#a78bfa", glow: "rgba(139,92,246,0.7)",  pulse: "4.5s" },
-  { id: "n5",   x: 155, y: 275, r: 8,  color: "#818cf8", glow: "rgba(99,102,241,0.65)", pulse: "3.8s" },
-  { id: "n6",   x: 105, y: 205, r: 7,  color: "#60a5fa", glow: "rgba(59,130,246,0.6)",  pulse: "4.2s" },
-  // ring 2 — outer
-  { id: "n7",   x: 230, y:  65, r: 6,  color: "#7dd3fc", glow: "rgba(125,211,252,0.6)", pulse: "5.5s" },
-  { id: "n8",   x: 380, y: 140, r: 5,  color: "#818cf8", glow: "rgba(99,102,241,0.5)",  pulse: "6s" },
-  { id: "n9",   x: 395, y: 275, r: 5,  color: "#a78bfa", glow: "rgba(139,92,246,0.5)",  pulse: "4.8s" },
-  { id: "n10",  x: 230, y: 340, r: 5,  color: "#60a5fa", glow: "rgba(59,130,246,0.5)",  pulse: "5.2s" },
-  { id: "n11",  x:  65, y: 285, r: 4,  color: "#818cf8", glow: "rgba(99,102,241,0.4)",  pulse: "6.5s" },
-  { id: "n12",  x:  75, y: 135, r: 4,  color: "#6366f1", glow: "rgba(99,102,241,0.4)",  pulse: "5.8s" },
-  { id: "n13",  x: 355, y:  65, r: 4,  color: "#7dd3fc", glow: "rgba(125,211,252,0.4)", pulse: "7s" },
-  // micro nodes
-  { id: "n14",  x: 195, y: 360, r: 3,  color: "#818cf8", glow: "rgba(99,102,241,0.3)",  pulse: "7s" },
-  { id: "n15",  x: 420, y: 195, r: 3,  color: "#60a5fa", glow: "rgba(59,130,246,0.3)",  pulse: "8s" },
-];
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-// Edges between nodes
-const EDGES = [
-  ["hub","n1"],["hub","n2"],["hub","n3"],["hub","n4"],["hub","n5"],["hub","n6"],
-  ["n1","n7"],["n1","n12"],["n1","n6"],
-  ["n2","n7"],["n2","n8"],["n2","n13"],
-  ["n3","n8"],["n3","n9"],
-  ["n4","n9"],["n4","n10"],
-  ["n5","n10"],["n5","n11"],
-  ["n6","n11"],["n6","n12"],
-  ["n7","n13"],["n9","n15"],["n10","n14"],["n11","n14"],
-];
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const S = 480;
+    canvas.width  = S * DPR;
+    canvas.height = S * DPR;
+    ctx.scale(DPR, DPR);
+    const cx = S / 2, cy = S / 2, R = 168;
 
-// Wireframe cube — isometric projection, center ≈ (230,190)
-const CUBE_EDGES = [
-  // top face
-  [[195,148],[245,122],[295,148],[245,174]],
-  // left face
-  [[195,148],[195,210],[245,236],[245,174]],
-  // right face
-  [[245,174],[295,148],[295,210],[245,236]],
-  // back top-left vertical
-  [[195,148],[195,148]],
-  // top-back
-  [[245,122],[295,96],[295,148]],
-];
+    /* Fibonacci sphere — 52 nodes evenly distributed */
+    const N = 52;
+    const φ = Math.PI * (3 - Math.sqrt(5));
+    const base = Array.from({ length: N }, (_, i) => {
+      const y  = 1 - (i / (N - 1)) * 2;
+      const r  = Math.sqrt(Math.max(0, 1 - y * y));
+      const th = φ * i;
+      return { x: Math.cos(th) * r, y, z: Math.sin(th) * r };
+    });
 
-function getNode(id: string) { return NODES.find(n => n.id === id)!; }
+    /* Pre-compute connections — nodes within arc-distance threshold */
+    const THR = 0.60;
+    const conns: [number, number][] = [];
+    for (let i = 0; i < N; i++)
+      for (let j = i + 1; j < N; j++) {
+        const a = base[i], b = base[j];
+        if (Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) < THR)
+          conns.push([i, j]);
+      }
 
-function HeroVisual() {
+    /* Perspective projection helper */
+    const project = (x: number, y: number, z: number) => {
+      const fov = 4.2;
+      const sc  = fov / (fov + z * 0.75);
+      return { px: cx + x * R * sc, py: cy + y * R * sc, sc, z };
+    };
+
+    let angle = 0;
+    let tiltY  = 0.18; // slight Y tilt for 3-D feel
+
+    const draw = () => {
+      ctx.clearRect(0, 0, S, S);
+
+      /* Slow Y rotation */
+      angle += 0.0025;
+
+      /* Rotate nodes */
+      const ca = Math.cos(angle), sa = Math.sin(angle);
+      const ct = Math.cos(tiltY),  st = Math.sin(tiltY);
+      const rot = base.map(n => {
+        // Y-axis rotation
+        const x1 =  n.x * ca + n.z * sa;
+        const z1 = -n.x * sa + n.z * ca;
+        // slight X-axis tilt
+        const y2 =  n.y * ct - z1 * st;
+        const z2 =  n.y * st + z1 * ct;
+        return { x: x1, y: y2, z: z2 };
+      });
+
+      const proj = rot.map(n => project(n.x, n.y, n.z));
+
+      /* ── 1. Central radial glow ── */
+      const bgGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 210);
+      bgGlow.addColorStop(0,   "rgba(59,130,246,0.10)");
+      bgGlow.addColorStop(0.4, "rgba(99,102,241,0.06)");
+      bgGlow.addColorStop(1,   "transparent");
+      ctx.fillStyle = bgGlow;
+      ctx.fillRect(0, 0, S, S);
+
+      /* ── 2. Outer violet bloom ── */
+      const bloom = ctx.createRadialGradient(cx + 30, cy - 30, 0, cx, cy, 260);
+      bloom.addColorStop(0,   "rgba(139,92,246,0.07)");
+      bloom.addColorStop(1,   "transparent");
+      ctx.fillStyle = bloom;
+      ctx.fillRect(0, 0, S, S);
+
+      /* ── 3. Edges (back to front by avg Z) ── */
+      const connsSorted = [...conns].sort(([i, j], [k, l]) =>
+        (rot[i].z + rot[j].z) - (rot[k].z + rot[l].z)
+      );
+
+      connsSorted.forEach(([i, j]) => {
+        const a = proj[i], b = proj[j];
+        const avgZ = (rot[i].z + rot[j].z) / 2;
+        const vis  = Math.max(0, (avgZ + 1) / 2);
+        if (vis < 0.05) return;
+
+        const g = ctx.createLinearGradient(a.px, a.py, b.px, b.py);
+        const blue   = `rgba(59,130,246,${vis * 0.75})`;
+        const violet = `rgba(139,92,246,${vis * 0.55})`;
+        g.addColorStop(0,   violet);
+        g.addColorStop(0.5, blue);
+        g.addColorStop(1,   violet);
+
+        ctx.beginPath();
+        ctx.moveTo(a.px, a.py);
+        ctx.lineTo(b.px, b.py);
+        ctx.strokeStyle = g;
+        ctx.lineWidth   = vis * 1.4;
+        ctx.stroke();
+      });
+
+      /* ── 4. Nodes (depth sorted, back to front) ── */
+      const order = rot.map((_, i) => i).sort((a, b) => rot[a].z - rot[b].z);
+
+      order.forEach(i => {
+        const p  = proj[i];
+        const d  = Math.max(0, (rot[i].z + 1) / 2); // 0=back, 1=front
+        const nr = p.sc * 7 + 2;
+
+        /* Color: front=blue, mid=indigo, back=violet */
+        const col = d > 0.65
+          ? [59, 130, 246]
+          : d > 0.35
+          ? [99, 102, 241]
+          : [139, 92, 246];
+        const [cr, cg, cb] = col;
+
+        const opacity = d * 0.55 + 0.38;
+
+        /* Outer glow ring */
+        ctx.save();
+        ctx.shadowBlur  = d * 24 + 6;
+        ctx.shadowColor = `rgba(${cr},${cg},${cb},0.9)`;
+
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, nr * 1.9, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${cr},${cg},${cb},${d * 0.08})`;
+        ctx.fill();
+
+        /* Core sphere */
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, nr, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${cr},${cg},${cb},${opacity})`;
+        ctx.fill();
+        ctx.restore();
+
+        /* Specular highlight */
+        ctx.beginPath();
+        ctx.arc(p.px - nr * 0.28, p.py - nr * 0.3, nr * 0.34, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${d * 0.5})`;
+        ctx.fill();
+      });
+
+      /* ── 5. Centre bright core ── */
+      const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, 50);
+      core.addColorStop(0,   "rgba(120,160,255,0.18)");
+      core.addColorStop(1,   "transparent");
+      ctx.fillStyle = core;
+      ctx.fillRect(0, 0, S, S);
+
+      /* ── 6. Platform glow bottom ── */
+      const plat = ctx.createRadialGradient(cx, cy + R * 0.85, 0, cx, cy + R * 0.85, 130);
+      plat.addColorStop(0,   "rgba(59,130,246,0.35)");
+      plat.addColorStop(0.5, "rgba(99,102,241,0.12)");
+      plat.addColorStop(1,   "transparent");
+      ctx.fillStyle = plat;
+      ctx.fillRect(0, 0, S, S);
+
+      rafRef.current = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
+
   return (
-    <div
-      className="relative w-full h-full"
-      style={{ animation: "network-drift 9s ease-in-out infinite" }}
-      aria-hidden="true"
-    >
-      {/* platform glow beneath */}
-      <div style={{
-        position: "absolute", bottom: "8%", left: "50%", transform: "translateX(-50%)",
-        width: 320, height: 36,
-        background: "radial-gradient(ellipse, rgba(59,130,246,0.55) 0%, rgba(99,102,241,0.25) 50%, transparent 70%)",
-        filter: "blur(16px)",
-        animation: "glow-pulse 3s ease-in-out infinite",
-      }} />
+    <div className="relative" style={{ width: 480, height: 480, maxWidth: "100%" }} aria-hidden="true">
+      <canvas
+        ref={canvasRef}
+        style={{ width: 480, height: 480, display: "block" }}
+      />
 
-      <svg
-        viewBox="0 0 460 420"
-        style={{ width: "100%", height: "100%", overflow: "visible" }}
-      >
-        <defs>
-          {/* Glow filter */}
-          <filter id="glow-sm" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glow-lg" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="7" result="blur" />
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
+      {/* Floating UI badges — CSS-positioned over canvas */}
+      <div style={{ position:"absolute", top:"6%", right:"4%", animation:"float 5s ease-in-out 0.4s infinite" }}>
+        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(59,130,246,0.55)", borderRadius:10, padding:"8px 14px", backdropFilter:"blur(14px)", boxShadow:"0 8px 32px rgba(0,0,0,0.55), 0 0 14px rgba(59,130,246,0.18)" }}>
+          <div style={{ fontSize:8, color:"rgba(148,163,184,0.55)", marginBottom:4, fontFamily:"monospace" }}>PageSpeed Insights</div>
+          <div style={{ display:"flex", alignItems:"baseline", gap:4 }}>
+            <span style={{ fontSize:22, fontWeight:800, color:"#22c55e", fontFamily:"monospace", lineHeight:1 }}>96</span>
+            <span style={{ fontSize:9, color:"rgba(74,222,128,0.7)" }}>/100</span>
+          </div>
+        </div>
+      </div>
 
-          {/* Gradient for edges */}
-          {EDGES.map(([a, b], i) => {
-            const na = getNode(a), nb = getNode(b);
-            return (
-              <linearGradient key={i} id={`eg${i}`} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y} gradientUnits="userSpaceOnUse">
-                <stop offset="0%"   stopColor={na.color} stopOpacity="0.15" />
-                <stop offset="50%"  stopColor={na.color} stopOpacity="0.7" />
-                <stop offset="100%" stopColor={nb.color} stopOpacity="0.15" />
-              </linearGradient>
-            );
-          })}
-        </defs>
+      <div style={{ position:"absolute", bottom:"22%", left:"0%", animation:"float 6.5s ease-in-out 1.2s infinite" }}>
+        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(139,92,246,0.45)", borderRadius:10, padding:"9px 13px", backdropFilter:"blur(14px)", boxShadow:"0 8px 32px rgba(0,0,0,0.5)" }}>
+          <div style={{ fontSize:8, color:"rgba(148,163,184,0.5)", marginBottom:5, fontFamily:"monospace" }}>Tech Stack</div>
+          {[["Next.js","#93c5fd"],["TypeScript","#a78bfa"],["Tailwind","#67e8f9"]].map(([t,c]) => (
+            <div key={t} style={{ fontSize:9, color:c, fontFamily:"monospace", lineHeight:1.9 }}>▸ {t}</div>
+          ))}
+        </div>
+      </div>
 
-        {/* ── Background area glow blobs ── */}
-        <ellipse cx="230" cy="200" rx="160" ry="140"
-          fill="rgba(59,130,246,0.04)" filter="url(#glow-lg)" />
-        <ellipse cx="260" cy="160" rx="100" ry="80"
-          fill="rgba(139,92,246,0.06)" filter="url(#glow-lg)" />
+      <div style={{ position:"absolute", top:"38%", right:"-2%", animation:"float 4.8s ease-in-out 2s infinite" }}>
+        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(34,197,94,0.4)", borderRadius:8, padding:"6px 11px", backdropFilter:"blur(12px)", display:"flex", alignItems:"center", gap:7 }}>
+          <div style={{ width:7, height:7, borderRadius:"50%", background:"#22c55e", boxShadow:"0 0 8px rgba(34,197,94,0.8)" }} />
+          <span style={{ fontSize:10, color:"#4ade80", fontFamily:"monospace", fontWeight:600 }}>Live deploy</span>
+        </div>
+      </div>
 
-        {/* ── Rotating outer orbit ring ── */}
-        <circle cx="230" cy="195" r="175" fill="none"
-          stroke="rgba(99,102,241,0.12)" strokeWidth="0.8"
-          strokeDasharray="6 14">
-          <animateTransform attributeName="transform" type="rotate"
-            from="0 230 195" to="360 230 195" dur="30s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="230" cy="195" r="155" fill="none"
-          stroke="rgba(59,130,246,0.08)" strokeWidth="0.5"
-          strokeDasharray="3 20">
-          <animateTransform attributeName="transform" type="rotate"
-            from="360 230 195" to="0 230 195" dur="22s" repeatCount="indefinite" />
-        </circle>
-
-        {/* ── Wireframe cube ── */}
-        {/* top face */}
-        <polygon points="195,148 245,122 295,148 245,174"
-          fill="rgba(99,102,241,0.08)" stroke="rgba(99,102,241,0.65)" strokeWidth="1">
-          <animate attributeName="fill-opacity" values="0.04;0.14;0.04" dur="4s" repeatCount="indefinite" />
-        </polygon>
-        {/* left face */}
-        <polygon points="195,148 195,210 245,236 245,174"
-          fill="rgba(59,130,246,0.05)" stroke="rgba(59,130,246,0.55)" strokeWidth="1">
-          <animate attributeName="fill-opacity" values="0.03;0.12;0.03" dur="5s" repeatCount="indefinite" begin="1s" />
-        </polygon>
-        {/* right face */}
-        <polygon points="245,174 295,148 295,210 245,236"
-          fill="rgba(139,92,246,0.06)" stroke="rgba(139,92,246,0.55)" strokeWidth="1">
-          <animate attributeName="fill-opacity" values="0.03;0.13;0.03" dur="4.5s" repeatCount="indefinite" begin="0.5s" />
-        </polygon>
-        {/* back edges */}
-        <line x1="245" y1="122" x2="245" y2="60" stroke="rgba(99,102,241,0.25)" strokeWidth="0.8" strokeDasharray="3 5">
-          <animate attributeName="stroke-opacity" values="0.15;0.5;0.15" dur="3s" repeatCount="indefinite" />
-        </line>
-        <line x1="195" y1="148" x2="145" y2="120" stroke="rgba(59,130,246,0.2)" strokeWidth="0.8" strokeDasharray="3 5" />
-        <line x1="295" y1="148" x2="345" y2="120" stroke="rgba(139,92,246,0.2)" strokeWidth="0.8" strokeDasharray="3 5" />
-
-        {/* ── Network edges — animated data flow ── */}
-        {EDGES.map(([a, b], i) => {
-          const na = getNode(a), nb = getNode(b);
-          const len = Math.hypot(nb.x - na.x, nb.y - na.y);
-          const dashLen = 6, gapLen = len * 0.6;
-          return (
-            <line key={i} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
-              stroke={`url(#eg${i})`} strokeWidth="0.8"
-              strokeDasharray={`${dashLen} ${gapLen}`}>
-              <animate attributeName="stroke-dashoffset"
-                values={`${len};0`}
-                dur={`${2 + (i % 5) * 0.6}s`}
-                repeatCount="indefinite" />
-            </line>
-          );
-        })}
-
-        {/* ── Node spheres ── */}
-        {NODES.map(n => (
-          <g key={n.id}>
-            {/* expanding sonar rings on hub + main nodes */}
-            {n.r >= 9 && (
-              <>
-                <circle cx={n.x} cy={n.y} r={n.r} fill="none" stroke={n.color} strokeWidth="1" opacity="0">
-                  <animate attributeName="r" values={`${n.r};${n.r + 28};${n.r + 28}`} dur={n.pulse} repeatCount="indefinite" begin="0s" />
-                  <animate attributeName="opacity" values="0.7;0;0" dur={n.pulse} repeatCount="indefinite" begin="0s" />
-                </circle>
-                <circle cx={n.x} cy={n.y} r={n.r} fill="none" stroke={n.color} strokeWidth="0.8" opacity="0">
-                  <animate attributeName="r" values={`${n.r};${n.r + 22};${n.r + 22}`} dur={n.pulse} repeatCount="indefinite" begin="calc(var(--dur)/2)" />
-                  <animate attributeName="opacity" values="0.5;0;0" dur={n.pulse} repeatCount="indefinite" />
-                </circle>
-              </>
-            )}
-            {/* glow halo */}
-            <circle cx={n.x} cy={n.y} r={n.r * 2} fill={n.glow.replace(/[\d.]+\)$/, "0.12)")} filter="url(#glow-sm)">
-              <animate attributeName="r" values={`${n.r * 1.8};${n.r * 2.6};${n.r * 1.8}`} dur={n.pulse} repeatCount="indefinite" />
-            </circle>
-            {/* core sphere with gradient fill */}
-            <circle cx={n.x} cy={n.y} r={n.r}
-              fill={n.color} opacity="0.88" filter="url(#glow-sm)">
-              <animate attributeName="opacity" values="0.7;1;0.7" dur={n.pulse} repeatCount="indefinite" />
-            </circle>
-            {/* specular highlight */}
-            <circle cx={n.x - n.r * 0.3} cy={n.y - n.r * 0.35} r={n.r * 0.38}
-              fill="white" opacity="0.4" />
-          </g>
-        ))}
-
-        {/* ── Floating label chips ── */}
-        <g style={{ animation: "float-x 5s ease-in-out 0.5s infinite" }}>
-          <g transform="translate(248,182)">
-            <rect x="0" y="0" width="54" height="17" rx="8.5"
-              fill="rgba(4,9,19,0.9)" stroke="rgba(59,130,246,0.6)" strokeWidth="0.8" />
-            <text x="27" y="12" textAnchor="middle" fontSize="7.5" fill="#93c5fd" fontFamily="monospace" fontWeight="600">Next.js</text>
-          </g>
-        </g>
-        <g style={{ animation: "float-x 6s ease-in-out 1.2s infinite" }}>
-          <g transform="translate(82,112)">
-            <rect x="0" y="0" width="65" height="17" rx="8.5"
-              fill="rgba(4,9,19,0.9)" stroke="rgba(99,102,241,0.6)" strokeWidth="0.8" />
-            <text x="32" y="12" textAnchor="middle" fontSize="7.5" fill="#a78bfa" fontFamily="monospace" fontWeight="600">TypeScript</text>
-          </g>
-        </g>
-        <g style={{ animation: "float-x 5.5s ease-in-out 2.2s infinite" }}>
-          <g transform="translate(348,186)">
-            <rect x="0" y="0" width="48" height="17" rx="8.5"
-              fill="rgba(4,9,19,0.9)" stroke="rgba(34,197,94,0.6)" strokeWidth="0.8" />
-            <text x="24" y="12" textAnchor="middle" fontSize="7.5" fill="#4ade80" fontFamily="monospace" fontWeight="700">PSI 96</text>
-          </g>
-        </g>
-        <g style={{ animation: "float-x 7s ease-in-out 0.8s infinite" }}>
-          <g transform="translate(298,300)">
-            <rect x="0" y="0" width="38" height="17" rx="8.5"
-              fill="rgba(4,9,19,0.9)" stroke="rgba(245,158,11,0.6)" strokeWidth="0.8" />
-            <text x="19" y="12" textAnchor="middle" fontSize="7.5" fill="#fbbf24" fontFamily="monospace" fontWeight="600">SEO</text>
-          </g>
-        </g>
-        <g style={{ animation: "float-x 5s ease-in-out 3s infinite" }}>
-          <g transform="translate(110,265)">
-            <rect x="0" y="0" width="38" height="17" rx="8.5"
-              fill="rgba(4,9,19,0.9)" stroke="rgba(244,63,94,0.5)" strokeWidth="0.8" />
-            <text x="19" y="12" textAnchor="middle" fontSize="7.5" fill="#fb7185" fontFamily="monospace" fontWeight="600">UI/UX</text>
-          </g>
-        </g>
-      </svg>
+      <div style={{ position:"absolute", top:"16%", left:"3%", animation:"float 5.8s ease-in-out 0.8s infinite" }}>
+        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(99,102,241,0.4)", borderRadius:8, padding:"6px 11px", backdropFilter:"blur(12px)" }}>
+          <span style={{ fontSize:9, color:"#818cf8", fontFamily:"monospace", fontWeight:600 }}>SEO ✦ Core Web Vitals</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -449,7 +437,7 @@ export default function Home() {
 
             {/* RIGHT — 3D tech visual */}
             <div className="hidden lg:flex relative h-[480px] items-center justify-center hero-animate hero-animate-3">
-              <HeroVisual />
+              <HeroSphere />
             </div>
           </div>
         </div>
