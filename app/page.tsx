@@ -80,196 +80,235 @@ function Counter({ target, suffix }: { target: number; suffix: string }) {
   return <div ref={ref}>{value}{suffix}</div>;
 }
 
-/* ─── Hero 3D Tech Visual (matches Stitch design) ─────────────
-   Floating browser window + code card + metric widget
-   layered with depth, glow platform beneath, all CSS-animated
+/* ─── Hero 3D Network Graph (faithful to Stitch design) ──────────
+   Wireframe cube center + sphere nodes + glowing connection lines
+   Matches the node-network visualization from the Stitch mockup
 ──────────────────────────────────────────────────────────────── */
+
+// Node positions in SVG viewBox 0 0 460 420
+const NODES = [
+  // center hub
+  { id: "hub",  x: 230, y: 195, r: 14, color: "#3b82f6", glow: "rgba(59,130,246,0.8)",  pulse: "3s" },
+  // ring 1
+  { id: "n1",   x: 155, y: 130, r: 9,  color: "#818cf8", glow: "rgba(99,102,241,0.7)",  pulse: "4s" },
+  { id: "n2",   x: 300, y: 115, r: 10, color: "#6366f1", glow: "rgba(99,102,241,0.7)",  pulse: "3.5s" },
+  { id: "n3",   x: 340, y: 210, r: 7,  color: "#60a5fa", glow: "rgba(59,130,246,0.6)",  pulse: "5s" },
+  { id: "n4",   x: 295, y: 290, r: 9,  color: "#a78bfa", glow: "rgba(139,92,246,0.7)",  pulse: "4.5s" },
+  { id: "n5",   x: 155, y: 275, r: 8,  color: "#818cf8", glow: "rgba(99,102,241,0.65)", pulse: "3.8s" },
+  { id: "n6",   x: 105, y: 205, r: 7,  color: "#60a5fa", glow: "rgba(59,130,246,0.6)",  pulse: "4.2s" },
+  // ring 2 — outer
+  { id: "n7",   x: 230, y:  65, r: 6,  color: "#7dd3fc", glow: "rgba(125,211,252,0.6)", pulse: "5.5s" },
+  { id: "n8",   x: 380, y: 140, r: 5,  color: "#818cf8", glow: "rgba(99,102,241,0.5)",  pulse: "6s" },
+  { id: "n9",   x: 395, y: 275, r: 5,  color: "#a78bfa", glow: "rgba(139,92,246,0.5)",  pulse: "4.8s" },
+  { id: "n10",  x: 230, y: 340, r: 5,  color: "#60a5fa", glow: "rgba(59,130,246,0.5)",  pulse: "5.2s" },
+  { id: "n11",  x:  65, y: 285, r: 4,  color: "#818cf8", glow: "rgba(99,102,241,0.4)",  pulse: "6.5s" },
+  { id: "n12",  x:  75, y: 135, r: 4,  color: "#6366f1", glow: "rgba(99,102,241,0.4)",  pulse: "5.8s" },
+  { id: "n13",  x: 355, y:  65, r: 4,  color: "#7dd3fc", glow: "rgba(125,211,252,0.4)", pulse: "7s" },
+  // micro nodes
+  { id: "n14",  x: 195, y: 360, r: 3,  color: "#818cf8", glow: "rgba(99,102,241,0.3)",  pulse: "7s" },
+  { id: "n15",  x: 420, y: 195, r: 3,  color: "#60a5fa", glow: "rgba(59,130,246,0.3)",  pulse: "8s" },
+];
+
+// Edges between nodes
+const EDGES = [
+  ["hub","n1"],["hub","n2"],["hub","n3"],["hub","n4"],["hub","n5"],["hub","n6"],
+  ["n1","n7"],["n1","n12"],["n1","n6"],
+  ["n2","n7"],["n2","n8"],["n2","n13"],
+  ["n3","n8"],["n3","n9"],
+  ["n4","n9"],["n4","n10"],
+  ["n5","n10"],["n5","n11"],
+  ["n6","n11"],["n6","n12"],
+  ["n7","n13"],["n9","n15"],["n10","n14"],["n11","n14"],
+];
+
+// Wireframe cube — isometric projection, center ≈ (230,190)
+const CUBE_EDGES = [
+  // top face
+  [[195,148],[245,122],[295,148],[245,174]],
+  // left face
+  [[195,148],[195,210],[245,236],[245,174]],
+  // right face
+  [[245,174],[295,148],[295,210],[245,236]],
+  // back top-left vertical
+  [[195,148],[195,148]],
+  // top-back
+  [[245,122],[295,96],[295,148]],
+];
+
+function getNode(id: string) { return NODES.find(n => n.id === id)!; }
+
 function HeroVisual() {
   return (
-    <div className="relative w-full h-full flex items-center justify-center" aria-hidden="true">
-
-      {/* Platform glow underneath everything */}
+    <div
+      className="relative w-full h-full"
+      style={{ animation: "network-drift 9s ease-in-out infinite" }}
+      aria-hidden="true"
+    >
+      {/* platform glow beneath */}
       <div style={{
-        position: "absolute", bottom: "15%", left: "50%", transform: "translateX(-50%)",
-        width: "340px", height: "40px",
-        background: "radial-gradient(ellipse, rgba(59,130,246,0.5) 0%, rgba(99,102,241,0.2) 40%, transparent 70%)",
-        filter: "blur(18px)",
+        position: "absolute", bottom: "8%", left: "50%", transform: "translateX(-50%)",
+        width: 320, height: 36,
+        background: "radial-gradient(ellipse, rgba(59,130,246,0.55) 0%, rgba(99,102,241,0.25) 50%, transparent 70%)",
+        filter: "blur(16px)",
         animation: "glow-pulse 3s ease-in-out infinite",
       }} />
 
-      {/* Main browser window — floats up/down */}
-      <div style={{
-        position: "relative", zIndex: 3,
-        animation: "float 5s ease-in-out infinite",
-        width: "300px",
-      }}>
-        <div style={{
-          background: "rgba(12,24,48,0.92)",
-          border: "1px solid rgba(59,130,246,0.35)",
-          borderRadius: "12px",
-          overflow: "hidden",
-          boxShadow: "0 30px 80px rgba(0,0,0,0.6), 0 0 40px rgba(59,130,246,0.15)",
-          backdropFilter: "blur(12px)",
-        }}>
-          {/* browser chrome */}
-          <div style={{ background: "rgba(6,13,26,0.9)", padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-            <div style={{ display: "flex", gap: 5 }}>
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#ef4444", opacity: 0.8 }} />
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#f59e0b", opacity: 0.8 }} />
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", opacity: 0.8 }} />
-            </div>
-            <div style={{ flex: 1, background: "rgba(255,255,255,0.06)", borderRadius: 4, height: 18, display: "flex", alignItems: "center", paddingLeft: 8 }}>
-              <span style={{ color: "rgba(148,163,184,0.6)", fontSize: 9, fontFamily: "monospace" }}>buildlab.pl</span>
-            </div>
-          </div>
-          {/* page content preview */}
-          <div style={{ padding: "14px 14px 10px" }}>
-            {/* hero bar */}
-            <div style={{ height: 32, background: "linear-gradient(90deg, rgba(59,130,246,0.3), rgba(99,102,241,0.2))", borderRadius: 6, marginBottom: 8, display: "flex", alignItems: "center", paddingLeft: 10 }}>
-              <div style={{ width: 60, height: 6, background: "rgba(255,255,255,0.6)", borderRadius: 3 }} />
-            </div>
-            {/* content rows */}
-            {[100, 85, 70, 55].map((w, i) => (
-              <div key={i} style={{ height: 6, background: `rgba(255,255,255,${0.06 + i * 0.02})`, borderRadius: 3, marginBottom: 6, width: `${w}%` }} />
-            ))}
-            {/* metric cards row */}
-            <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
-              {[
-                { label: "PSI", val: "96", color: "#3b82f6" },
-                { label: "LCP", val: "1.2s", color: "#22c55e" },
-                { label: "CLS", val: "0.01", color: "#a78bfa" },
-              ].map(m => (
-                <div key={m.label} style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: `1px solid ${m.color}33`, borderRadius: 6, padding: "6px 4px", textAlign: "center" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: m.color, fontFamily: "monospace" }}>{m.val}</div>
-                  <div style={{ fontSize: 8, color: "rgba(148,163,184,0.5)", marginTop: 2 }}>{m.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Floating code card — top-right */}
-      <div style={{
-        position: "absolute", top: "5%", right: "2%", zIndex: 4,
-        animation: "float 4s ease-in-out 0.8s infinite",
-        width: "160px",
-      }}>
-        <div style={{
-          background: "rgba(6,13,26,0.95)",
-          border: "1px solid rgba(139,92,246,0.4)",
-          borderRadius: 10,
-          padding: "10px 12px",
-          boxShadow: "0 20px 50px rgba(0,0,0,0.5), 0 0 20px rgba(139,92,246,0.1)",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#a78bfa" }} />
-            <span style={{ color: "rgba(167,139,250,0.7)", fontSize: 8, fontFamily: "monospace" }}>index.tsx</span>
-          </div>
-          {[
-            { color: "#60a5fa", text: "export default" },
-            { color: "#f472b6", text: "  function Page" },
-            { color: "#a78bfa", text: "  return (" },
-            { color: "#e2e8f0", text: "    <main>" },
-            { color: "#4ade80", text: "      <Hero />" },
-            { color: "#e2e8f0", text: "    </main>" },
-          ].map((l, i) => (
-            <div key={i} style={{ fontSize: 8, fontFamily: "monospace", color: l.color, lineHeight: 1.8, opacity: 0.85 }}>{l.text}</div>
-          ))}
-        </div>
-      </div>
-
-      {/* Floating performance widget — bottom-left */}
-      <div style={{
-        position: "absolute", bottom: "18%", left: "0%", zIndex: 4,
-        animation: "float 6s ease-in-out 1.5s infinite",
-        width: "130px",
-      }}>
-        <div style={{
-          background: "rgba(6,13,26,0.95)",
-          border: "1px solid rgba(34,197,94,0.35)",
-          borderRadius: 10,
-          padding: "10px 12px",
-          boxShadow: "0 20px 50px rgba(0,0,0,0.5), 0 0 20px rgba(34,197,94,0.08)",
-        }}>
-          <div style={{ fontSize: 8, color: "rgba(148,163,184,0.6)", marginBottom: 6, fontFamily: "monospace" }}>Performance</div>
-          {/* circular score */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <svg width="36" height="36" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
-              <circle cx="18" cy="18" r="15" fill="none" stroke="#22c55e" strokeWidth="3"
-                strokeDasharray={`${2 * Math.PI * 15 * 0.96} ${2 * Math.PI * 15}`}
-                strokeLinecap="round" transform="rotate(-90 18 18)" />
-              <text x="18" y="22" textAnchor="middle" fontSize="9" fill="#22c55e" fontWeight="700" fontFamily="monospace">96</text>
-            </svg>
-            <div>
-              <div style={{ fontSize: 8, color: "#4ade80", fontWeight: 600 }}>Świetny</div>
-              <div style={{ fontSize: 7, color: "rgba(148,163,184,0.5)", marginTop: 2 }}>PageSpeed</div>
-            </div>
-          </div>
-          {/* mini bar chart */}
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 3, marginTop: 8, height: 20 }}>
-            {[60, 80, 55, 90, 75, 96].map((h, i) => (
-              <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: "2px 2px 0 0", background: i === 5 ? "#22c55e" : "rgba(59,130,246,0.3)", transition: "height 0.3s" }} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Floating "Live" badge — top-left */}
-      <div style={{
-        position: "absolute", top: "12%", left: "4%", zIndex: 4,
-        animation: "float 3.5s ease-in-out 2s infinite",
-      }}>
-        <div style={{
-          background: "rgba(6,13,26,0.95)",
-          border: "1px solid rgba(59,130,246,0.3)",
-          borderRadius: 20,
-          padding: "5px 10px",
-          display: "flex", alignItems: "center", gap: 6,
-          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-        }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#3b82f6", animation: "badge-glow 2s ease-in-out infinite" }} />
-          <span style={{ fontSize: 9, color: "#93c5fd", fontWeight: 600 }}>Live deploy</span>
-        </div>
-      </div>
-
-      {/* Connection lines (SVG) */}
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} aria-hidden="true">
+      <svg
+        viewBox="0 0 460 420"
+        style={{ width: "100%", height: "100%", overflow: "visible" }}
+      >
         <defs>
-          <linearGradient id="line1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="rgba(59,130,246,0)" />
-            <stop offset="50%" stopColor="rgba(59,130,246,0.4)" />
-            <stop offset="100%" stopColor="rgba(59,130,246,0)" />
-          </linearGradient>
-          <linearGradient id="line2" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="rgba(139,92,246,0)" />
-            <stop offset="50%" stopColor="rgba(139,92,246,0.3)" />
-            <stop offset="100%" stopColor="rgba(139,92,246,0)" />
-          </linearGradient>
-        </defs>
-        <line x1="72%" y1="20%" x2="50%" y2="35%" stroke="url(#line2)" strokeWidth="1" strokeDasharray="4 4">
-          <animate attributeName="stroke-dashoffset" values="0;-16" dur="2s" repeatCount="indefinite" />
-        </line>
-        <line x1="28%" y1="70%" x2="50%" y2="55%" stroke="url(#line1)" strokeWidth="1" strokeDasharray="4 4">
-          <animate attributeName="stroke-dashoffset" values="0;-16" dur="2.5s" repeatCount="indefinite" />
-        </line>
-        <line x1="28%" y1="18%" x2="45%" y2="35%" stroke="url(#line1)" strokeWidth="1" strokeDasharray="4 4">
-          <animate attributeName="stroke-dashoffset" values="0;-16" dur="3s" repeatCount="indefinite" />
-        </line>
-      </svg>
+          {/* Glow filter */}
+          <filter id="glow-sm" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="glow-lg" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="7" result="blur" />
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
 
-      {/* Ambient glow blobs */}
-      <div style={{
-        position: "absolute", top: "10%", right: "10%", width: 150, height: 150,
-        background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)",
-        filter: "blur(30px)", animation: "orb-pulse 5s ease-in-out infinite", pointerEvents: "none", zIndex: 1,
-      }} />
-      <div style={{
-        position: "absolute", bottom: "20%", left: "10%", width: 120, height: 120,
-        background: "radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)",
-        filter: "blur(25px)", animation: "orb-pulse 4s ease-in-out 1s infinite", pointerEvents: "none", zIndex: 1,
-      }} />
+          {/* Gradient for edges */}
+          {EDGES.map(([a, b], i) => {
+            const na = getNode(a), nb = getNode(b);
+            return (
+              <linearGradient key={i} id={`eg${i}`} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y} gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stopColor={na.color} stopOpacity="0.15" />
+                <stop offset="50%"  stopColor={na.color} stopOpacity="0.7" />
+                <stop offset="100%" stopColor={nb.color} stopOpacity="0.15" />
+              </linearGradient>
+            );
+          })}
+        </defs>
+
+        {/* ── Background area glow blobs ── */}
+        <ellipse cx="230" cy="200" rx="160" ry="140"
+          fill="rgba(59,130,246,0.04)" filter="url(#glow-lg)" />
+        <ellipse cx="260" cy="160" rx="100" ry="80"
+          fill="rgba(139,92,246,0.06)" filter="url(#glow-lg)" />
+
+        {/* ── Rotating outer orbit ring ── */}
+        <circle cx="230" cy="195" r="175" fill="none"
+          stroke="rgba(99,102,241,0.12)" strokeWidth="0.8"
+          strokeDasharray="6 14">
+          <animateTransform attributeName="transform" type="rotate"
+            from="0 230 195" to="360 230 195" dur="30s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="230" cy="195" r="155" fill="none"
+          stroke="rgba(59,130,246,0.08)" strokeWidth="0.5"
+          strokeDasharray="3 20">
+          <animateTransform attributeName="transform" type="rotate"
+            from="360 230 195" to="0 230 195" dur="22s" repeatCount="indefinite" />
+        </circle>
+
+        {/* ── Wireframe cube ── */}
+        {/* top face */}
+        <polygon points="195,148 245,122 295,148 245,174"
+          fill="rgba(99,102,241,0.08)" stroke="rgba(99,102,241,0.65)" strokeWidth="1">
+          <animate attributeName="fill-opacity" values="0.04;0.14;0.04" dur="4s" repeatCount="indefinite" />
+        </polygon>
+        {/* left face */}
+        <polygon points="195,148 195,210 245,236 245,174"
+          fill="rgba(59,130,246,0.05)" stroke="rgba(59,130,246,0.55)" strokeWidth="1">
+          <animate attributeName="fill-opacity" values="0.03;0.12;0.03" dur="5s" repeatCount="indefinite" begin="1s" />
+        </polygon>
+        {/* right face */}
+        <polygon points="245,174 295,148 295,210 245,236"
+          fill="rgba(139,92,246,0.06)" stroke="rgba(139,92,246,0.55)" strokeWidth="1">
+          <animate attributeName="fill-opacity" values="0.03;0.13;0.03" dur="4.5s" repeatCount="indefinite" begin="0.5s" />
+        </polygon>
+        {/* back edges */}
+        <line x1="245" y1="122" x2="245" y2="60" stroke="rgba(99,102,241,0.25)" strokeWidth="0.8" strokeDasharray="3 5">
+          <animate attributeName="stroke-opacity" values="0.15;0.5;0.15" dur="3s" repeatCount="indefinite" />
+        </line>
+        <line x1="195" y1="148" x2="145" y2="120" stroke="rgba(59,130,246,0.2)" strokeWidth="0.8" strokeDasharray="3 5" />
+        <line x1="295" y1="148" x2="345" y2="120" stroke="rgba(139,92,246,0.2)" strokeWidth="0.8" strokeDasharray="3 5" />
+
+        {/* ── Network edges — animated data flow ── */}
+        {EDGES.map(([a, b], i) => {
+          const na = getNode(a), nb = getNode(b);
+          const len = Math.hypot(nb.x - na.x, nb.y - na.y);
+          const dashLen = 6, gapLen = len * 0.6;
+          return (
+            <line key={i} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
+              stroke={`url(#eg${i})`} strokeWidth="0.8"
+              strokeDasharray={`${dashLen} ${gapLen}`}>
+              <animate attributeName="stroke-dashoffset"
+                values={`${len};0`}
+                dur={`${2 + (i % 5) * 0.6}s`}
+                repeatCount="indefinite" />
+            </line>
+          );
+        })}
+
+        {/* ── Node spheres ── */}
+        {NODES.map(n => (
+          <g key={n.id}>
+            {/* expanding sonar rings on hub + main nodes */}
+            {n.r >= 9 && (
+              <>
+                <circle cx={n.x} cy={n.y} r={n.r} fill="none" stroke={n.color} strokeWidth="1" opacity="0">
+                  <animate attributeName="r" values={`${n.r};${n.r + 28};${n.r + 28}`} dur={n.pulse} repeatCount="indefinite" begin="0s" />
+                  <animate attributeName="opacity" values="0.7;0;0" dur={n.pulse} repeatCount="indefinite" begin="0s" />
+                </circle>
+                <circle cx={n.x} cy={n.y} r={n.r} fill="none" stroke={n.color} strokeWidth="0.8" opacity="0">
+                  <animate attributeName="r" values={`${n.r};${n.r + 22};${n.r + 22}`} dur={n.pulse} repeatCount="indefinite" begin="calc(var(--dur)/2)" />
+                  <animate attributeName="opacity" values="0.5;0;0" dur={n.pulse} repeatCount="indefinite" />
+                </circle>
+              </>
+            )}
+            {/* glow halo */}
+            <circle cx={n.x} cy={n.y} r={n.r * 2} fill={n.glow.replace(/[\d.]+\)$/, "0.12)")} filter="url(#glow-sm)">
+              <animate attributeName="r" values={`${n.r * 1.8};${n.r * 2.6};${n.r * 1.8}`} dur={n.pulse} repeatCount="indefinite" />
+            </circle>
+            {/* core sphere with gradient fill */}
+            <circle cx={n.x} cy={n.y} r={n.r}
+              fill={n.color} opacity="0.88" filter="url(#glow-sm)">
+              <animate attributeName="opacity" values="0.7;1;0.7" dur={n.pulse} repeatCount="indefinite" />
+            </circle>
+            {/* specular highlight */}
+            <circle cx={n.x - n.r * 0.3} cy={n.y - n.r * 0.35} r={n.r * 0.38}
+              fill="white" opacity="0.4" />
+          </g>
+        ))}
+
+        {/* ── Floating label chips ── */}
+        <g style={{ animation: "float-x 5s ease-in-out 0.5s infinite" }}>
+          <g transform="translate(248,182)">
+            <rect x="0" y="0" width="54" height="17" rx="8.5"
+              fill="rgba(4,9,19,0.9)" stroke="rgba(59,130,246,0.6)" strokeWidth="0.8" />
+            <text x="27" y="12" textAnchor="middle" fontSize="7.5" fill="#93c5fd" fontFamily="monospace" fontWeight="600">Next.js</text>
+          </g>
+        </g>
+        <g style={{ animation: "float-x 6s ease-in-out 1.2s infinite" }}>
+          <g transform="translate(82,112)">
+            <rect x="0" y="0" width="65" height="17" rx="8.5"
+              fill="rgba(4,9,19,0.9)" stroke="rgba(99,102,241,0.6)" strokeWidth="0.8" />
+            <text x="32" y="12" textAnchor="middle" fontSize="7.5" fill="#a78bfa" fontFamily="monospace" fontWeight="600">TypeScript</text>
+          </g>
+        </g>
+        <g style={{ animation: "float-x 5.5s ease-in-out 2.2s infinite" }}>
+          <g transform="translate(348,186)">
+            <rect x="0" y="0" width="48" height="17" rx="8.5"
+              fill="rgba(4,9,19,0.9)" stroke="rgba(34,197,94,0.6)" strokeWidth="0.8" />
+            <text x="24" y="12" textAnchor="middle" fontSize="7.5" fill="#4ade80" fontFamily="monospace" fontWeight="700">PSI 96</text>
+          </g>
+        </g>
+        <g style={{ animation: "float-x 7s ease-in-out 0.8s infinite" }}>
+          <g transform="translate(298,300)">
+            <rect x="0" y="0" width="38" height="17" rx="8.5"
+              fill="rgba(4,9,19,0.9)" stroke="rgba(245,158,11,0.6)" strokeWidth="0.8" />
+            <text x="19" y="12" textAnchor="middle" fontSize="7.5" fill="#fbbf24" fontFamily="monospace" fontWeight="600">SEO</text>
+          </g>
+        </g>
+        <g style={{ animation: "float-x 5s ease-in-out 3s infinite" }}>
+          <g transform="translate(110,265)">
+            <rect x="0" y="0" width="38" height="17" rx="8.5"
+              fill="rgba(4,9,19,0.9)" stroke="rgba(244,63,94,0.5)" strokeWidth="0.8" />
+            <text x="19" y="12" textAnchor="middle" fontSize="7.5" fill="#fb7185" fontFamily="monospace" fontWeight="600">UI/UX</text>
+          </g>
+        </g>
+      </svg>
     </div>
   );
 }
