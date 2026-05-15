@@ -661,14 +661,28 @@ export default function Home() {
             <nav aria-label="Linki stopki">
               <div className="flex flex-wrap gap-x-12 gap-y-6">
                 {[
-                  { title: "Usługi", links: ["Strony WWW", "Sklepy online", "SEO & Analityka", "UI/UX Design"] },
-                  { title: "Firma", links: ["O nas", "Realizacje", "Cennik", "Blog"] },
-                  { title: "Kontakt", links: ["Wycena projektu", "kontakt@buildlab.pl"] },
+                  { title: "Usługi", links: [
+                    { label: "Strony WWW", href: "/uslugi/nowa-strona-www" },
+                    { label: "Sklepy online", href: "/uslugi/sklep-internetowy" },
+                    { label: "SEO & Pozycjonowanie", href: "/uslugi/seo-pozycjonowanie" },
+                    { label: "Landing page", href: "/uslugi/landing-page" },
+                  ]},
+                  { title: "Firma", links: [
+                    { label: "O nas", href: "/o-nas" },
+                    { label: "Realizacje", href: "/realizacje" },
+                    { label: "Cennik", href: "/cennik" },
+                    { label: "Blog", href: "/blog" },
+                  ]},
+                  { title: "Kontakt", links: [
+                    { label: "Wycena projektu", href: "/wycen-projekt" },
+                    { label: "kontakt@buildlab.pl", href: "mailto:kontakt@buildlab.pl" },
+                    { label: "+48 792 350 450", href: "tel:+48792350450" },
+                  ]},
                 ].map(col => (
                   <div key={col.title}>
                     <p className="text-white font-semibold text-sm mb-3">{col.title}</p>
                     <ul className="space-y-2" role="list">
-                      {col.links.map(l => <li key={l}><a href="#" className="text-slate-500 hover:text-slate-300 text-sm transition-colors">{l}</a></li>)}
+                      {col.links.map(l => <li key={l.label}><a href={l.href} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">{l.label}</a></li>)}
                     </ul>
                   </div>
                 ))}
@@ -676,8 +690,8 @@ export default function Home() {
             </nav>
           </div>
           <div className="mt-10 pt-6 border-t border-white/5 text-xs text-slate-600 flex flex-col sm:flex-row justify-between gap-2">
-            <p>© 2025 BuildLab. Wszelkie prawa zastrzeżone.</p>
-            <p>NIP: — | REGON: — | KRS: —</p>
+            <p>© 2025 Second Life IT Sp. z o.o. · buildlab.pl jest marką Second Life IT Sp. z o.o.</p>
+            <p>NIP: 5252714316 · REGON: 367524546 · KRS: 0000682194</p>
           </div>
         </div>
       </footer>
