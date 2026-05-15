@@ -424,20 +424,19 @@ export default function Home() {
               <div className="hero-animate hero-animate-1">
                 <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm text-blue-300 mb-8 badge-pulse">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" aria-hidden="true" />
-                  Agencja cyfrowa z doświadczeniem
+                  Agencja WWW · Warszawa
                 </span>
               </div>
               <div className="hero-animate hero-animate-2">
                 <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-[1.1] tracking-tight mb-6">
-                  Twoja Cyfrowa<br />
-                  <span className="grad-text">Przyszłość:</span><br />
-                  Strony, SEO<br />
-                  <span className="text-slate-300">i Kod.</span>
+                  Strony i sklepy,<br />
+                  które <span className="grad-text">szybciej</span><br />
+                  <span className="text-slate-300">zdobywają klientów</span>
                 </h1>
               </div>
               <div className="hero-animate hero-animate-3">
                 <p className="text-lg text-slate-400 max-w-lg mb-10 leading-relaxed">
-                  Budujemy strony i aplikacje webowe, które działają błyskawicznie, wyglądają świetnie i generują wyniki. Od projektu do wdrożenia w jednym zespole.
+                  Od strategii i projektu UX po kod, SEO, hosting i dalsze wsparcie. Jeden zespół odpowiada za stronę od briefu po rozwój.
                 </p>
               </div>
               <div className="hero-animate hero-animate-4 flex flex-col sm:flex-row gap-4">
