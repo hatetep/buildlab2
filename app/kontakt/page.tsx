@@ -2,44 +2,6 @@
 
 import { useState } from "react";
 
-function SubNavbar() {
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/8 bg-[#040913]/90 backdrop-blur-2xl">
-      <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2.5 font-bold text-xl">
-          <span
-            className="inline-flex w-8 h-8 rounded-lg bg-blue-600 items-center justify-center text-white text-sm font-black"
-            style={{ boxShadow: "0 0 20px rgba(59,130,246,0.5)" }}
-          >
-            BL
-          </span>
-          <span className="text-white">
-            Build<span className="text-blue-400">Lab</span>
-          </span>
-        </a>
-        <ul className="hidden md:flex items-center gap-8 text-sm text-slate-400">
-          {["Usługi", "Realizacje", "Cennik", "Blog", "Kontakt"].map((l) => (
-            <li key={l}>
-              <a
-                href={`/${l.toLowerCase()}`}
-                className="hover:text-white transition-colors"
-              >
-                {l}
-              </a>
-            </li>
-          ))}
-        </ul>
-        <a
-          href="/wycen-projekt"
-          className="hidden md:inline-flex items-center gap-2 rounded-full bg-blue-600 hover:bg-blue-500 px-5 py-2 text-sm font-semibold text-white transition-all"
-        >
-          Wycena projektu
-        </a>
-      </div>
-    </nav>
-  );
-}
-
 const contactInfo = [
   {
     icon: (
@@ -130,7 +92,6 @@ export default function KontaktPage() {
 
   return (
     <main className="min-h-screen bg-[#040913] text-white">
-      <SubNavbar />
 
       {/* Hero */}
       <section className="pt-40 pb-16 px-6">

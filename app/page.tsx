@@ -344,52 +344,6 @@ const PARTICLES = Array.from({ length: 25 }, (_, i) => ({
   op: 0.12 + (i % 5) * 0.06,
 }));
 
-/* ─── Navbar ─────────────────────────────────────────────────── */
-function Navbar() {
-  const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
-  }, []);
-
-  return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "border-b border-white/8 bg-[#040913]/90 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.5)]" : "bg-transparent"}`}
-      aria-label="Nawigacja główna"
-    >
-      <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2.5 font-bold text-xl" aria-label="BuildLab — strona główna">
-          <span className="inline-flex w-8 h-8 rounded-lg bg-blue-600 items-center justify-center text-white text-sm font-black" style={{ boxShadow: "0 0 20px rgba(59,130,246,0.5)" }}>BL</span>
-          <span className="text-white">Build<span className="grad-text-blue">Lab</span></span>
-        </a>
-        <ul className="hidden md:flex items-center gap-8 text-sm text-slate-400" role="list">
-          {["Usługi", "Realizacje", "Cennik", "Blog", "Kontakt"].map(l => (
-            <li key={l}><a href={`/${l.toLowerCase()}`} className="hover:text-white transition-colors relative group">{l}<span className="absolute -bottom-0.5 left-0 w-0 h-px bg-blue-400 transition-all duration-300 group-hover:w-full" aria-hidden="true" /></a></li>
-          ))}
-        </ul>
-        <a href="/wycen-projekt" className="hidden md:inline-flex items-center gap-2 rounded-full bg-blue-600 hover:bg-blue-500 px-5 py-2 text-sm font-semibold text-white transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]">
-          Wycena projektu
-        </a>
-        <button onClick={() => setOpen(o => !o)} className="md:hidden text-white p-2" aria-label={open ? "Zamknij menu" : "Otwórz menu"} aria-expanded={open} aria-controls="mobile-menu">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            {open ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></> : <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>}
-          </svg>
-        </button>
-      </div>
-      {open && (
-        <div id="mobile-menu" className="md:hidden border-t border-white/5 bg-[#040913]/95 px-6 py-4 flex flex-col gap-4">
-          {["Usługi", "Realizacje", "Cennik", "Blog", "Kontakt"].map(l => (
-            <a key={l} href={`/${l.toLowerCase()}`} className="text-slate-300 hover:text-white py-1" onClick={() => setOpen(false)}>{l}</a>
-          ))}
-          <a href="/wycen-projekt" className="mt-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white text-center">Wycena projektu</a>
-        </div>
-      )}
-    </nav>
-  );
-}
-
 /* ─── Main page ──────────────────────────────────────────────── */
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -397,7 +351,6 @@ export default function Home() {
 
   return (
     <div className="relative z-10">
-      <Navbar />
 
       {/* ══ HERO ══════════════════════════════════════════════ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -647,54 +600,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══ FOOTER ════════════════════════════════════════════ */}
-      <footer className="border-t border-white/5 py-12 relative z-10">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-col md:flex-row justify-between gap-8">
-            <div>
-              <div className="flex items-center gap-2.5 font-bold text-xl mb-3">
-                <span className="inline-flex w-8 h-8 rounded-lg bg-blue-600 items-center justify-center text-white text-sm font-black">BL</span>
-                <span className="text-white">Build<span className="grad-text-blue">Lab</span></span>
-              </div>
-              <p className="text-slate-500 text-sm max-w-xs">Agencja cyfrowa tworząca strony, sklepy i aplikacje webowe. Szybko, solidnie, z wynikami.</p>
-            </div>
-            <nav aria-label="Linki stopki">
-              <div className="flex flex-wrap gap-x-12 gap-y-6">
-                {[
-                  { title: "Usługi", links: [
-                    { label: "Strony WWW", href: "/uslugi/nowa-strona-www" },
-                    { label: "Sklepy online", href: "/uslugi/sklep-internetowy" },
-                    { label: "SEO & Pozycjonowanie", href: "/uslugi/seo-pozycjonowanie" },
-                    { label: "Landing page", href: "/uslugi/landing-page" },
-                  ]},
-                  { title: "Firma", links: [
-                    { label: "O nas", href: "/o-nas" },
-                    { label: "Realizacje", href: "/realizacje" },
-                    { label: "Cennik", href: "/cennik" },
-                    { label: "Blog", href: "/blog" },
-                  ]},
-                  { title: "Kontakt", links: [
-                    { label: "Wycena projektu", href: "/wycen-projekt" },
-                    { label: "kontakt@buildlab.pl", href: "mailto:kontakt@buildlab.pl" },
-                    { label: "+48 792 350 450", href: "tel:+48792350450" },
-                  ]},
-                ].map(col => (
-                  <div key={col.title}>
-                    <p className="text-white font-semibold text-sm mb-3">{col.title}</p>
-                    <ul className="space-y-2" role="list">
-                      {col.links.map(l => <li key={l.label}><a href={l.href} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">{l.label}</a></li>)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </nav>
-          </div>
-          <div className="mt-10 pt-6 border-t border-white/5 text-xs text-slate-600 flex flex-col sm:flex-row justify-between gap-2">
-            <p>© 2025 Second Life IT Sp. z o.o. · buildlab.pl jest marką Second Life IT Sp. z o.o.</p>
-            <p>NIP: 5252714316 · REGON: 367524546 · KRS: 0000682194</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

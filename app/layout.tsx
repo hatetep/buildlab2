@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import ScrollReveal from "@/components/ScrollReveal";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const font = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
@@ -22,7 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pl" className={`${font.variable} h-full`}>
       <body className="min-h-full mesh-bg grid-lines antialiased" style={{ fontFamily: "var(--font-jakarta), sans-serif" }}>
         <ScrollReveal />
+        <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );
