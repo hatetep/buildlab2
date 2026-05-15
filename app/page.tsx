@@ -38,7 +38,7 @@ const stats = [
 ];
 
 /* ─── IntersectionObserver reveal hook ──────────────────────── */
-function useReveal(threshold = 0.12) {
+function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = ref.current;
@@ -46,20 +46,19 @@ function useReveal(threshold = 0.12) {
     const obs = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) {
-          el.classList.add("visible");
-          // cascade to all nested .reveal children
-          // transitionDelay inline styles handle stagger
+          // reveal all .reveal children — transitionDelay handles stagger
           el.querySelectorAll<HTMLElement>(".reveal").forEach(child => {
             child.classList.add("visible");
           });
           obs.disconnect();
         }
       },
-      { threshold }
+      // threshold:0 fires as soon as 1px of sentinel enters viewport
+      { threshold: 0, rootMargin: "0px 0px -60px 0px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [threshold]);
+  }, []);
   return ref;
 }
 
@@ -371,11 +370,11 @@ function Navbar() {
 /* ─── Main page ──────────────────────────────────────────────── */
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const servicesRef = useReveal(0.08);
-  const processRef  = useReveal(0.08);
-  const realizRef   = useReveal(0.08);
-  const faqRef      = useReveal(0.08);
-  const ctaRef      = useReveal(0.08);
+  const servicesRef = useReveal();
+  const processRef  = useReveal();
+  const realizRef   = useReveal();
+  const faqRef      = useReveal();
+  const ctaRef      = useReveal();
 
   return (
     <div className="relative z-10">
@@ -461,8 +460,8 @@ export default function Home() {
       {/* ══ SERVICES ══════════════════════════════════════════ */}
       <section id="uslugi" className="py-24 relative z-10">
         <div className="mx-auto max-w-6xl px-6">
-          <div ref={servicesRef} className="reveal">
-            <div className="text-center mb-16">
+          <div ref={servicesRef}>
+            <div className="reveal text-center mb-16">
               <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Co robimy</p>
               <h2 className="text-4xl font-extrabold text-white mb-4">Nasze usługi — <span className="grad-text">Technologia | Design</span></h2>
               <p className="text-slate-400 max-w-xl mx-auto">Kompleksowa obsługa cyfrowa — od pierwszego szkicu do działającego produktu.</p>
@@ -489,8 +488,8 @@ export default function Home() {
       {/* ══ PROCESS ═══════════════════════════════════════════ */}
       <section id="proces" className="py-24 relative z-10">
         <div className="mx-auto max-w-6xl px-6">
-          <div ref={processRef} className="reveal">
-            <div className="text-center mb-16">
+          <div ref={processRef}>
+            <div className="reveal text-center mb-16">
               <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Jak pracujemy</p>
               <h2 className="text-4xl font-extrabold text-white">Proces w <span className="grad-text">4 krokach</span></h2>
             </div>
@@ -515,8 +514,8 @@ export default function Home() {
 
       {/* ══ REALIZACJE — horizontal scroll ════════════════════ */}
       <section id="realizacje" className="py-24 relative z-10 overflow-hidden">
-        <div ref={realizRef} className="reveal">
-          <div className="mx-auto max-w-6xl px-6 mb-10">
+        <div ref={realizRef}>
+          <div className="reveal mx-auto max-w-6xl px-6 mb-10">
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Portfolio</p>
@@ -569,14 +568,14 @@ export default function Home() {
       {/* ══ FAQ ═══════════════════════════════════════════════ */}
       <section id="faq" className="py-24 relative z-10">
         <div className="mx-auto max-w-3xl px-6">
-          <div ref={faqRef} className="reveal">
-            <div className="text-center mb-12">
+          <div ref={faqRef}>
+            <div className="reveal text-center mb-12">
               <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Pytania</p>
               <h2 className="text-4xl font-extrabold text-white">FAQ</h2>
             </div>
             <dl className="space-y-3">
               {faqs.map((f, i) => (
-                <div key={i} className="glass rounded-2xl overflow-hidden">
+                <div key={i} className="reveal glass rounded-2xl overflow-hidden" style={{ transitionDelay: `${i * 80}ms` }}>
                   <dt>
                     <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
                       className="w-full flex items-center justify-between px-6 py-5 text-left font-semibold text-white hover:text-blue-300 transition-colors"
@@ -602,8 +601,8 @@ export default function Home() {
       {/* ══ CTA ═══════════════════════════════════════════════ */}
       <section className="py-24 relative z-10">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <div ref={ctaRef} className="reveal">
-            <div className="glass rounded-3xl p-12 md:p-16 relative overflow-hidden">
+          <div ref={ctaRef}>
+            <div className="reveal glass rounded-3xl p-12 md:p-16 relative overflow-hidden">
               <div className="absolute inset-0 rounded-3xl pointer-events-none" aria-hidden="true"
                 style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.18) 0%, transparent 65%)", animation: "orb-pulse 5s ease-in-out infinite" }} />
               <div className="absolute top-4 right-6 flex gap-1.5" aria-hidden="true">
