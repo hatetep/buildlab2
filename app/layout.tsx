@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import ScrollReveal from "@/components/ScrollReveal";
 
 const font = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pl" className={`${font.variable} h-full`}>
       <body className="min-h-full mesh-bg grid-lines antialiased" style={{ fontFamily: "var(--font-jakarta), sans-serif" }}>
+        <ScrollReveal />
         {children}
       </body>
     </html>
