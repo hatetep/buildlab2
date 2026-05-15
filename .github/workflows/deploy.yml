@@ -24,7 +24,6 @@ jobs:
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
-          apiKey: ${{ secrets.CF_API_TOKEN }}
-          email: ${{ secrets.CF_API_EMAIL }}
+          apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           command: pages deploy out --project-name=buildlab2 --commit-dirty=true
