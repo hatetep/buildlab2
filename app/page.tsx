@@ -44,7 +44,17 @@ function useReveal(threshold = 0.12) {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { el.classList.add("visible"); obs.disconnect(); } },
+      ([e]) => {
+        if (e.isIntersecting) {
+          el.classList.add("visible");
+          // cascade to all nested .reveal children
+          // transitionDelay inline styles handle stagger
+          el.querySelectorAll<HTMLElement>(".reveal").forEach(child => {
+            child.classList.add("visible");
+          });
+          obs.disconnect();
+        }
+      },
       { threshold }
     );
     obs.observe(el);
