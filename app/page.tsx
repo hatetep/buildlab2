@@ -37,29 +37,22 @@ const stats = [
   { val: 100, suffix: "%", label: "satysfakcji" },
 ];
 
-/* ─── IntersectionObserver reveal hook ──────────────────────── */
-function useReveal() {
-  const ref = useRef<HTMLDivElement>(null);
+/* ─── Scroll-reveal: each element watches itself ─────────────── */
+function useScrollReveal() {
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const els = document.querySelectorAll<HTMLElement>(".reveal");
     const obs = new IntersectionObserver(
-      ([e]) => {
+      (entries) => entries.forEach(e => {
         if (e.isIntersecting) {
-          // reveal all .reveal children — transitionDelay handles stagger
-          el.querySelectorAll<HTMLElement>(".reveal").forEach(child => {
-            child.classList.add("visible");
-          });
-          obs.disconnect();
+          (e.target as HTMLElement).classList.add("visible");
+          obs.unobserve(e.target);
         }
-      },
-      // threshold:0 fires as soon as 1px of sentinel enters viewport
-      { threshold: 0, rootMargin: "0px 0px -60px 0px" }
+      }),
+      { threshold: 0.12 }
     );
-    obs.observe(el);
+    els.forEach(el => obs.observe(el));
     return () => obs.disconnect();
   }, []);
-  return ref;
 }
 
 /* ─── Animated counter ───────────────────────────────────────── */
@@ -306,6 +299,36 @@ function HeroSphere() {
           <span style={{ fontSize:9, color:"#818cf8", fontFamily:"monospace", fontWeight:600 }}>SEO ✦ Core Web Vitals</span>
         </div>
       </div>
+
+      {/* Cloudflare CDN */}
+      <div style={{ position:"absolute", bottom:"8%", right:"5%", animation:"float 7s ease-in-out 1.8s infinite" }}>
+        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(249,115,22,0.4)", borderRadius:10, padding:"7px 13px", backdropFilter:"blur(14px)", boxShadow:"0 6px 24px rgba(0,0,0,0.5)" }}>
+          <div style={{ fontSize:8, color:"rgba(148,163,184,0.5)", marginBottom:4, fontFamily:"monospace" }}>CDN / Edge</div>
+          <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+            <div style={{ width:6, height:6, borderRadius:"50%", background:"#fb923c", boxShadow:"0 0 6px rgba(251,146,60,0.8)" }} />
+            <span style={{ fontSize:10, color:"#fb923c", fontFamily:"monospace", fontWeight:700 }}>Cloudflare Pages</span>
+          </div>
+        </div>
+      </div>
+
+      {/* LCP metric */}
+      <div style={{ position:"absolute", top:"55%", left:"-2%", animation:"float 6.2s ease-in-out 3s infinite" }}>
+        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(34,197,94,0.35)", borderRadius:10, padding:"8px 13px", backdropFilter:"blur(14px)" }}>
+          <div style={{ fontSize:8, color:"rgba(148,163,184,0.5)", marginBottom:3, fontFamily:"monospace" }}>Largest Contentful Paint</div>
+          <div style={{ display:"flex", alignItems:"baseline", gap:3 }}>
+            <span style={{ fontSize:18, fontWeight:800, color:"#22c55e", fontFamily:"monospace", lineHeight:1 }}>0.9</span>
+            <span style={{ fontSize:9, color:"rgba(74,222,128,0.7)" }}>s</span>
+          </div>
+        </div>
+      </div>
+
+      {/* CI/CD pipeline */}
+      <div style={{ position:"absolute", top:"2%", left:"28%", animation:"float 5.4s ease-in-out 0.3s infinite" }}>
+        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(148,163,184,0.2)", borderRadius:8, padding:"6px 12px", backdropFilter:"blur(12px)", display:"flex", alignItems:"center", gap:6 }}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+          <span style={{ fontSize:9, color:"#94a3b8", fontFamily:"monospace", fontWeight:600 }}>CI/CD · git push → deploy</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -370,11 +393,7 @@ function Navbar() {
 /* ─── Main page ──────────────────────────────────────────────── */
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const servicesRef = useReveal();
-  const processRef  = useReveal();
-  const realizRef   = useReveal();
-  const faqRef      = useReveal();
-  const ctaRef      = useReveal();
+  useScrollReveal();
 
   return (
     <div className="relative z-10">
@@ -460,7 +479,7 @@ export default function Home() {
       {/* ══ SERVICES ══════════════════════════════════════════ */}
       <section id="uslugi" className="py-24 relative z-10">
         <div className="mx-auto max-w-6xl px-6">
-          <div ref={servicesRef}>
+          <div>
             <div className="reveal text-center mb-16">
               <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Co robimy</p>
               <h2 className="text-4xl font-extrabold text-white mb-4">Nasze usługi — <span className="grad-text">Technologia | Design</span></h2>
@@ -488,7 +507,7 @@ export default function Home() {
       {/* ══ PROCESS ═══════════════════════════════════════════ */}
       <section id="proces" className="py-24 relative z-10">
         <div className="mx-auto max-w-6xl px-6">
-          <div ref={processRef}>
+          <div>
             <div className="reveal text-center mb-16">
               <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Jak pracujemy</p>
               <h2 className="text-4xl font-extrabold text-white">Proces w <span className="grad-text">4 krokach</span></h2>
@@ -514,7 +533,7 @@ export default function Home() {
 
       {/* ══ REALIZACJE — horizontal scroll ════════════════════ */}
       <section id="realizacje" className="py-24 relative z-10 overflow-hidden">
-        <div ref={realizRef}>
+        <div>
           <div className="reveal mx-auto max-w-6xl px-6 mb-10">
             <div className="flex items-end justify-between">
               <div>
@@ -568,7 +587,7 @@ export default function Home() {
       {/* ══ FAQ ═══════════════════════════════════════════════ */}
       <section id="faq" className="py-24 relative z-10">
         <div className="mx-auto max-w-3xl px-6">
-          <div ref={faqRef}>
+          <div>
             <div className="reveal text-center mb-12">
               <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Pytania</p>
               <h2 className="text-4xl font-extrabold text-white">FAQ</h2>
@@ -601,7 +620,7 @@ export default function Home() {
       {/* ══ CTA ═══════════════════════════════════════════════ */}
       <section className="py-24 relative z-10">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <div ref={ctaRef}>
+          <div>
             <div className="reveal glass rounded-3xl p-12 md:p-16 relative overflow-hidden">
               <div className="absolute inset-0 rounded-3xl pointer-events-none" aria-hidden="true"
                 style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.18) 0%, transparent 65%)", animation: "orb-pulse 5s ease-in-out infinite" }} />
