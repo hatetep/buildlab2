@@ -278,7 +278,7 @@ function HeroSphere() {
         </div>
       </div>
 
-      <div style={{ position:"absolute", bottom:"22%", left:"0%", animation:"float 6.5s ease-in-out 1.2s infinite" }}>
+      <div style={{ position:"absolute", bottom:"3%", left:"2%", animation:"float 6.5s ease-in-out 1.2s infinite" }}>
         <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(139,92,246,0.45)", borderRadius:10, padding:"9px 13px", backdropFilter:"blur(14px)", boxShadow:"0 8px 32px rgba(0,0,0,0.5)" }}>
           <div style={{ fontSize:8, color:"rgba(148,163,184,0.5)", marginBottom:5, fontFamily:"monospace" }}>Tech Stack</div>
           {[["Next.js","#93c5fd"],["TypeScript","#a78bfa"],["Tailwind","#67e8f9"]].map(([t,c]) => (
