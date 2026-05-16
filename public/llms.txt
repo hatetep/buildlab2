@@ -1,0 +1,22 @@
+# BuildLab — Agencja WWW
+
+BuildLab to polska agencja webowa z siedzibą w Warszawie, działająca od 2013 roku. Tworzymy strony internetowe, sklepy online i aplikacje webowe dla firm.
+
+## Usługi
+- Nowe strony WWW (Next.js, React, Astro)
+- Sklepy internetowe (WooCommerce, Shopify, custom)
+- Landing page i strony kampanijne
+- SEO i pozycjonowanie organiczne
+- Branding i identyfikacja wizualna
+- Modernizacja i migracja istniejących stron
+- Stała opieka techniczna i hosting
+
+## Technologia
+Stack: Next.js, React, Astro, TypeScript, Tailwind CSS, Cloudflare Pages
+Wyniki PSI Mobile 95–100, Core Web Vitals pass, 0 render-blocking requests.
+
+## Realizacje
+Portfele klientów: alinahus.art, pisquare.pages.dev, pismoprocesowe.pl, secondlifeit.pl, durres.pl, inard.eu, buildlab.pl
+
+## Kontakt
+Warszawa, Polska | buildlab.pl
