@@ -48,7 +48,7 @@ export default function Footer() {
             <div className="flex flex-wrap gap-x-12 gap-y-6">
               {footerCols.map(col => (
                 <div key={col.title}>
-                  <p className="text-white font-semibold text-sm mb-3">{col.title}</p>
+                  <h3 className="text-white font-semibold text-sm mb-3">{col.title}</h3>
                   <ul className="space-y-2" role="list">
                     {col.links.map(l => (
                       <li key={l.label}>

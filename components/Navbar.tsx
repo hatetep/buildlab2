@@ -74,15 +74,21 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div id="mobile-menu" className="md:hidden border-t border-white/5 bg-[#040913]/95 px-6 py-4 flex flex-col gap-4">
-          {navLinks.map(l => (
-            <a key={l.href} href={l.href} className="text-slate-300 hover:text-white py-1 transition-colors" onClick={() => setOpen(false)}>
-              {l.label}
-            </a>
-          ))}
-          <a href="/wycen-projekt" className="mt-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white text-center" onClick={() => setOpen(false)}>
-            Wycena projektu
-          </a>
+        <div id="mobile-menu" className="md:hidden border-t border-white/5 bg-[#040913]/95 px-6 py-4">
+          <ul className="flex flex-col gap-4" role="list">
+            {navLinks.map(l => (
+              <li key={l.href}>
+                <a href={l.href} className="text-slate-300 hover:text-white py-1 transition-colors block" onClick={() => setOpen(false)}>
+                  {l.label}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a href="/wycen-projekt" className="mt-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white text-center block" onClick={() => setOpen(false)}>
+                Wycena projektu
+              </a>
+            </li>
+          </ul>
         </div>
       )}
     </nav>

@@ -66,6 +66,10 @@ function Counter({ target, suffix }: { target: number; suffix: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const started = useRef(false);
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setValue(target);
+      return;
+    }
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(([e]) => {
@@ -353,6 +357,7 @@ const PARTICLES = Array.from({ length: 25 }, (_, i) => ({
 /* ─── Main page ──────────────────────────────────────────────── */
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [marquePaused, setMarquePaused] = useState(false);
   useScrollReveal();
 
   return (
@@ -498,10 +503,22 @@ export default function Home() {
                 <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Portfolio</p>
                 <h2 className="text-4xl font-extrabold text-white">Realizacje</h2>
               </div>
-              <a href="/realizacje" className="hidden sm:inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold text-sm transition-colors">
-                Wszystkie projekty
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-              </a>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setMarquePaused(p => !p)}
+                  className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/10 hover:border-blue-500/40 px-4 py-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                  aria-label={marquePaused ? "Wznów przewijanie portfolio" : "Zatrzymaj przewijanie portfolio"}
+                >
+                  {marquePaused
+                    ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>Wznów</>
+                    : <><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Pauza</>
+                  }
+                </button>
+                <a href="/realizacje" className="hidden sm:inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold text-sm transition-colors">
+                  Wszystkie projekty
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -512,9 +529,9 @@ export default function Home() {
 
             <div
               className="flex gap-5 w-max pb-4"
-              style={{ animation: "marquee 40s linear infinite", paddingLeft: "20px" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.animationPlayState = "paused"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.animationPlayState = "running"; }}
+              style={{ animation: "marquee 40s linear infinite", animationPlayState: marquePaused ? "paused" : "running", paddingLeft: "20px" }}
+              onMouseEnter={e => { if (!marquePaused) (e.currentTarget as HTMLDivElement).style.animationPlayState = "paused"; }}
+              onMouseLeave={e => { if (!marquePaused) (e.currentTarget as HTMLDivElement).style.animationPlayState = "running"; }}
             >
               {[...portfolioProjects, ...portfolioProjects].map((p, i) => (
                 <a
@@ -569,7 +586,7 @@ export default function Home() {
                       </svg>
                     </button>
                   </dt>
-                  <dd id={`faq-answer-${i}`} role="region" aria-labelledby={`faq-question-${i}`}
+                  <dd id={`faq-answer-${i}`}
                     hidden={openFaq !== i} className="px-6 pb-5 text-slate-400 leading-relaxed text-sm border-t border-white/5">
                     <div className="pt-4">{f.a}</div>
                   </dd>
