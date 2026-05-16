@@ -22,12 +22,14 @@ const faqs = [
   { q: "Czy mogę samodzielnie edytować treści?", a: "Tak. Integrujemy CMS (Sanity, Contentful lub własny panel). Edycja treści nie wymaga wiedzy technicznej." },
 ];
 
-const projects = [
-  { slug: "pismo-procesowe", title: "PismoProcesowe.pl", tag: "Prawo / Landing page", year: "2025", accent: "59,130,246" },
-  { slug: "second-life-it", title: "SecondLifeIT.pl", tag: "Technologia / Strona firmowa", year: "2025", accent: "139,92,246" },
-  { slug: "durres-pl", title: "Durres.pl", tag: "Nieruchomości / Strona firmowa", year: "2025", accent: "16,185,129" },
-  { slug: "inard-eu", title: "Inard.eu", tag: "E-commerce / Biżuteria", year: "2024", accent: "245,158,11" },
-  { slug: "buildlab-pl", title: "Buildlab.pl", tag: "Agencja / Strona firmowa", year: "2024", accent: "244,63,94" },
+const portfolioProjects = [
+  { slug: "pisquare-pl",       title: "Pi Square",          tag: "Portfolio artystyczne",        year: "2026" },
+  { slug: "alinahus-art",      title: "Alina Hus",           tag: "Portfolio artystyczne",        year: "2026" },
+  { slug: "pismoprocesowe-pl", title: "PismoProcesowe.pl",   tag: "Prawo / Landing page",         year: "2025" },
+  { slug: "secondlifeit-pl",   title: "SecondLifeIT.pl",     tag: "Technologia / Strona firmowa", year: "2025" },
+  { slug: "durres-pl",         title: "Durres.pl",           tag: "Nieruchomości / Strona firmowa", year: "2025" },
+  { slug: "inard-eu",          title: "Inard.eu",            tag: "E-commerce / Biżuteria",       year: "2024" },
+  { slug: "buildlab-pl",       title: "Buildlab.pl",         tag: "Agencja / Strona firmowa",     year: "2024" },
 ];
 
 const stats = [
@@ -347,6 +349,10 @@ const PARTICLES = Array.from({ length: 25 }, (_, i) => ({
 /* ─── Main page ──────────────────────────────────────────────── */
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const scrollSlider = (dir: 1 | -1) => {
+    sliderRef.current?.scrollBy({ left: dir * 380, behavior: "smooth" });
+  };
   useScrollReveal();
 
   return (
@@ -492,29 +498,47 @@ export default function Home() {
                 <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Portfolio</p>
                 <h2 className="text-4xl font-extrabold text-white">Realizacje</h2>
               </div>
-              <a href="/realizacje" className="hidden sm:inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold text-sm transition-colors">
-                Wszystkie projekty
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-              </a>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => scrollSlider(-1)}
+                  aria-label="Poprzedni projekt"
+                  className="w-9 h-9 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center hover:border-blue-500/40 hover:bg-blue-500/10 transition-all"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <button
+                  onClick={() => scrollSlider(1)}
+                  aria-label="Następny projekt"
+                  className="w-9 h-9 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center hover:border-blue-500/40 hover:bg-blue-500/10 transition-all"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+                <a href="/realizacje" className="hidden sm:inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold text-sm transition-colors ml-2">
+                  Wszystkie projekty
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              </div>
             </div>
           </div>
 
           {/* horizontal scroll container */}
-          <div className="flex gap-5 overflow-x-auto pb-4 px-6 snap-x snap-mandatory" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-            <style>{`.no-scroll::-webkit-scrollbar { display: none; }`}</style>
-            {projects.map((p, i) => (
+          <div ref={sliderRef} className="flex gap-5 overflow-x-auto pb-4 px-6 snap-x snap-mandatory" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+            <style>{`[data-slider]::-webkit-scrollbar { display: none; }`}</style>
+            {portfolioProjects.map((p, i) => (
               <a key={p.slug} href={`/realizacje/${p.slug}`}
                 className="reveal flex-none w-[300px] md:w-[360px] glass rounded-2xl overflow-hidden group snap-start hover:no-underline"
                 style={{ transitionDelay: `${i * 70}ms` }}>
-                {/* thumbnail with animated glow */}
-                <div className="h-48 flex items-center justify-center relative overflow-hidden"
-                  style={{ background: `radial-gradient(ellipse at 40% 40%, rgba(${p.accent},0.22) 0%, rgba(6,13,26,1) 75%)` }}>
-                  <div className="absolute inset-0 opacity-20"
-                    style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)", backgroundSize: "30px 30px" }}
-                    aria-hidden="true" />
-                  <div className="w-20 h-20 rounded-full opacity-30 group-hover:opacity-70 group-hover:scale-150 transition-all duration-700"
-                    style={{ background: `radial-gradient(circle, rgba(${p.accent},0.7) 0%, transparent 70%)` }} aria-hidden="true" />
-                  <div className="absolute top-3 right-3 text-xs text-slate-600 font-mono opacity-40">{p.year}</div>
+                {/* real screenshot thumbnail */}
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={`/realizacje/${p.slug}-thumb.webp`}
+                    alt={`Realizacja — ${p.title}`}
+                    loading="lazy"
+                    decoding="async"
+                    width={820}
+                    height={615}
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+                  />
                 </div>
                 <div className="p-5">
                   <p className="text-xs text-slate-500 mb-1">{p.tag}</p>
