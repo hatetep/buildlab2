@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <ScrollReveal />
         <Navbar />
-        {children}
+        <main>{children}</main>
         <Footer />
       </body>
     </html>

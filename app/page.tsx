@@ -26,13 +26,13 @@ const faqs = [
 ];
 
 const portfolioProjects = [
-  { slug: "pisquare-pl",       title: "Pi Square",          tag: "Portfolio artystyczne",        year: "2026" },
-  { slug: "alinahus-art",      title: "Alina Hus",           tag: "Portfolio artystyczne",        year: "2026" },
-  { slug: "pismoprocesowe-pl", title: "PismoProcesowe.pl",   tag: "Prawo / Landing page",         year: "2025" },
-  { slug: "secondlifeit-pl",   title: "SecondLifeIT.pl",     tag: "Technologia / Strona firmowa", year: "2025" },
-  { slug: "durres-pl",         title: "Durres.pl",           tag: "Nieruchomości / Strona firmowa", year: "2025" },
-  { slug: "inard-eu",          title: "Inard.eu",            tag: "E-commerce / Biżuteria",       year: "2024" },
-  { slug: "buildlab-pl",       title: "Buildlab.pl",         tag: "Agencja / Strona firmowa",     year: "2024" },
+  { slug: "pisquare-pl",       title: "Pi Square",          tag: "Portfolio artystyczne",        year: "2026", thumb: "thumb" },
+  { slug: "alinahus-art",      title: "Alina Hus",           tag: "Portfolio artystyczne",        year: "2026", thumb: "thumb-sm" },
+  { slug: "pismoprocesowe-pl", title: "PismoProcesowe.pl",   tag: "Prawo / Landing page",         year: "2025", thumb: "thumb-sm" },
+  { slug: "secondlifeit-pl",   title: "SecondLifeIT.pl",     tag: "Technologia / Strona firmowa", year: "2025", thumb: "thumb-sm" },
+  { slug: "durres-pl",         title: "Durres.pl",           tag: "Nieruchomości / Strona firmowa", year: "2025", thumb: "thumb-sm" },
+  { slug: "inard-eu",          title: "Inard.eu",            tag: "E-commerce / Biżuteria",       year: "2024", thumb: "thumb-sm" },
+  { slug: "buildlab-pl",       title: "Buildlab.pl",         tag: "Agencja / Strona firmowa",     year: "2024", thumb: "thumb-sm" },
 ];
 
 const stats = [
@@ -526,17 +526,17 @@ export default function Home() {
                 >
                   <div className="h-44 overflow-hidden">
                     <img
-                      src={`/realizacje/${p.slug}-thumb.webp`}
+                      src={`/realizacje/${p.slug}-${p.thumb}.webp`}
                       alt={i < portfolioProjects.length ? `Realizacja — ${p.title}` : ""}
                       loading="lazy"
                       decoding="async"
-                      width={820}
-                      height={615}
+                      width={400}
+                      height={300}
                       className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
                     />
                   </div>
                   <div className="p-4">
-                    <p className="text-xs text-slate-500 mb-1">{p.tag}</p>
+                    <p className="text-xs text-slate-400 mb-1">{p.tag}</p>
                     <h3 className="font-bold text-white group-hover:text-blue-300 transition-colors text-sm">{p.title}</h3>
                   </div>
                 </a>
@@ -559,6 +559,7 @@ export default function Home() {
                 <div key={i} className="reveal glass rounded-2xl overflow-hidden" style={{ transitionDelay: `${i * 80}ms` }}>
                   <dt>
                     <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                      id={`faq-question-${i}`}
                       className="w-full flex items-center justify-between px-6 py-5 text-left font-semibold text-white hover:text-blue-300 transition-colors"
                       aria-expanded={openFaq === i} aria-controls={`faq-answer-${i}`}>
                       {f.q}

@@ -39,7 +39,7 @@ export default function Footer() {
               <span className="inline-flex w-8 h-8 rounded-lg bg-blue-600 items-center justify-center text-white text-sm font-black">BL</span>
               <span className="text-white">Build<span className="grad-text-blue">Lab</span></span>
             </a>
-            <p className="text-slate-500 text-sm leading-relaxed">
+            <p className="text-slate-400 text-sm leading-relaxed">
               Agencja WWW tworząca strony, sklepy i aplikacje. Od briefu po wdrożenie i dalszy rozwój.
             </p>
           </div>
@@ -52,7 +52,7 @@ export default function Footer() {
                   <ul className="space-y-2" role="list">
                     {col.links.map(l => (
                       <li key={l.label}>
-                        <a href={l.href} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">
+                        <a href={l.href} className="text-slate-400 hover:text-slate-200 text-sm transition-colors">
                           {l.label}
                         </a>
                       </li>
@@ -64,7 +64,7 @@ export default function Footer() {
           </nav>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-white/5 text-xs text-slate-600 flex flex-col sm:flex-row justify-between gap-2">
+        <div className="mt-10 pt-6 border-t border-white/5 text-xs text-slate-400 flex flex-col sm:flex-row justify-between gap-2">
           <p>© {new Date().getFullYear()} Second Life IT Sp. z o.o. · buildlab.pl jest marką Second Life IT Sp. z o.o.</p>
           <p>NIP: 5252714316 · REGON: 367524546 · KRS: 0000682194</p>
         </div>
