@@ -22,6 +22,47 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    slug: "pisquare-pl",
+    name: "Pi Square — portfolio malarki",
+    category: "Portfolio artystyczne",
+    year: "2026",
+    stack: "Astro 6 · CSS · TypeScript",
+    shortDesc: "Dwujęzyczne portfolio współczesnej malarki — galeria z AVIF/WebP, lightbox, trzy cykle twórcze, migracja z WordPress.",
+    url: "https://pisquare.pages.dev",
+    meta: {
+      title: "Pi Square — Astro 6 portfolio malarki (case study)",
+      description: "Case study pisquare.pages.dev — Astro 6 static site z AVIF picture elements, self-hosted fontem, lightboxem i pełnym bilingual EN/PL. PSI Mobile 95+, Desktop 99-100.",
+    },
+    hero: {
+      eyebrow: "Case study",
+      title: "Portfolio dla",
+      accent: "współczesnej malarki",
+      description: "Pi Square tworzy malarstwo olejne i akrylowe w trzech cyklach twórczych. Strona miała przenieść siłę płótna do sieci — bez WordPressa, bez bloatu, z prawdziwą szybkością.",
+    },
+    challenge: "Malarka Pi Square miała istniejącą stronę na WordPress z ciężkimi JPEG-ami i wynikiem PSI Mobile poniżej 50. Galeria na 30+ obrazów ładowała się po 8 sekundach — w segmencie sztuki, gdzie pierwsze wrażenie wizualne decyduje o tym, czy kolekcjoner wróci. Dodatkowo: dwie wersje językowe (PL/EN) dla rynku polskiego i zagranicznego, lightbox do oglądania detalów obrazów w pełnej rozdzielczości, czytelna biografia artystki bez korporacyjnego tonu. Migracja z WordPressa bez straty URL-i.",
+    approach: "Astro 6 z pełnym static outputem — zero runtime JS po stronie serwera, HTML serwowany bezpośrednio z Cloudflare Pages CDN. Strategia obrazów: AVIF primary + WebP fallback przez picture element, dwa srcset (1240px desktop + 640px mobile), media query blokuje PSI DPR-trap. Self-hosted Inter via @fontsource (brak round-tripu do Google Fonts). CSS inlineowany — 0 render-blocking requestów. Dwujęzyczność: EN w src/pages/, PL w src/pages/pl/ — manual mirror bez i18n pluginu.",
+    features: [
+      { t: "AVIF + WebP picture elements", d: "Każdy obraz jako picture z AVIF primary i WebP fallback. Dwa srcset: 1240px desktop + 640px mobile. Oszczędność 50-70% vs JPEG." },
+      { t: "DPR-trap fix via source media", d: "source media='(max-width: 620px)' wymusza 640px na mobile niezależnie od DPR urządzenia. PSI nie wyświetla błędu 'oversized images'." },
+      { t: "Self-hosted font, zero FOUT", d: "@fontsource/inter — pliki woff2 w public/assets/fonts/. Preload w head, font-display: swap. Brak round-tripu do Google." },
+      { t: "CSS inlineowany w head", d: "Astro inlineStylesheets: 'always' — cały CSS wbudowany w HTML. 0 render-blocking stylesheet requestów, LCP widzi tekst natychmiast." },
+      { t: "Lightbox vanilla JS", d: "30+ obrazów z możliwością oglądania w pełnej rozdzielczości (do 1920px). Klawiatura (Esc, strzałki), swipe mobile, focus trap, reduced-motion." },
+      { t: "Bilingual EN/PL bez pluginu i18n", d: "EN w src/pages/, PL w src/pages/pl/ — ręczny mirror. Przewidywalne URL-e, pełna kontrola nad SEO per język, zero zależności od pluginu." },
+      { t: "Migracja z WordPress", d: "Przeniesienie treści, obrazów i struktury z WP. Nowe AVIF generowane z oryginałów 1920px z lokalnego WP." },
+      { t: "PSI Mobile 95+, Desktop 99-100", d: "All audit-doctor checks pass. Speed Index < 2s na Slow 4G dzięki inlined CSS, self-hosted font i Cloudflare Pages anycast." },
+    ],
+    results: [
+      { value: "95+", label: "PSI Mobile (migracja z WP < 50)" },
+      { value: "AVIF", label: "primary format — 60% lżejszy niż JPEG" },
+      { value: "0", label: "render-blocking requestów" },
+      { value: "EN + PL", label: "pełna dwujęzyczność bez i18n pluginu" },
+    ],
+    techStack: ["Astro 6.3", "TypeScript", "CSS3 (inlined)", "Cloudflare Pages", "AVIF + WebP picture", "@fontsource/inter", "Vanilla JS lightbox"],
+    timeline: "niecałe 3 tygodnie",
+    related: ["pismoprocesowe-pl", "inard-eu", "alinahus-art"],
+  },
+
+  {
     slug: "alinahus-art",
     name: "Alina Hus — portfolio malarki olejnej",
     category: "Portfolio artystyczne",
