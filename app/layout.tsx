@@ -29,21 +29,22 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = '{"@context":"https://schema.org","@type":"Organization","name":"BuildLab","url":"https://buildlab2.pages.dev","logo":"https://buildlab2.pages.dev/favicon.ico","description":"Polska agencja webowa — strony WWW, sklepy online, aplikacje webowe. Warszawa.","address":{"@type":"PostalAddress","addressLocality":"Warszawa","addressCountry":"PL"},"sameAs":["https://buildlab.pl"]}';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pl" className={`${font.variable} h-full`}>
-      <body className="min-h-full mesh-bg grid-lines antialiased" style={{ fontFamily: "var(--font-jakarta), sans-serif" }}>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: '{"@context":"https://schema.org","@type":"Organization","name":"BuildLab","url":"https://buildlab2.pages.dev","logo":"https://buildlab2.pages.dev/favicon.ico","description":"Polska agencja webowa — strony WWW, sklepy online, aplikacje webowe. Warszawa.","address":{"@type":"PostalAddress","addressLocality":"Warszawa","addressCountry":"PL"},"sameAs":["https://buildlab.pl"]}' }}
-        />
+    <html lang="pl" className={`${font.variable} h-full`} suppressHydrationWarning>
+      <head>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+      </head>
+      <body className="min-h-full mesh-bg grid-lines antialiased" style={{ fontFamily: "var(--font-jakarta), sans-serif" }} suppressHydrationWarning>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-full focus:font-semibold focus:outline-none">
           Przejdź do treści
         </a>
-        <ScrollReveal />
         <Navbar />
         <main id="main-content">{children}</main>
         <Footer />
+        <ScrollReveal />
       </body>
     </html>
   );
