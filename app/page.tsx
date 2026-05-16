@@ -96,6 +96,7 @@ function HeroSphere() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (!canvas.offsetParent) return; // hidden on mobile (parent has display:none)
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 

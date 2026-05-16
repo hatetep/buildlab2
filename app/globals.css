@@ -246,10 +246,10 @@ body {
 /* ─── Reduced motion — covers transitions, animations, glow pulses ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+    animation: none !important;
     transition-duration: 0.01ms !important;
   }
   html { scroll-behavior: auto; }
-  .reveal, .reveal-right { opacity: 1; transform: none; }
+  /* Elements with opacity:0 in their CSS rules or animation from-state must be reset */
+  .reveal, .reveal-right, .hero-animate { opacity: 1 !important; transform: none !important; }
 }
