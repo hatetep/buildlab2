@@ -16,10 +16,13 @@ const steps = [
 ];
 
 const faqs = [
-  { q: "Ile kosztuje strona internetowa?", a: "Cena zależy od zakresu projektu. Prosta strona wizytówkowa to koszt od 2 500 zł, sklep internetowy od 6 000 zł. Zawsze wyceniamy indywidualnie po krótkim wywiadzie — wycena jest bezpłatna." },
-  { q: "Jak długo trwa realizacja projektu?", a: "Strona firmowa: 2–3 tygodnie. Sklep online lub rozbudowany portal: 4–8 tygodni. Terminy ustalamy na etapie umowy i ich dotrzymujemy." },
-  { q: "Czy BuildLab zajmuje się hostingiem?", a: "Tak. Stawiamy strony na Cloudflare Pages — ultra-szybki hosting, odporny na ruch, bezpłatny w planie podstawowym." },
-  { q: "Czy mogę samodzielnie edytować treści?", a: "Tak. Integrujemy CMS (Sanity, Contentful lub własny panel). Edycja treści nie wymaga wiedzy technicznej." },
+  { q: "Ile trwa wykonanie strony WWW?", a: "Strona wizytówka (do 5 podstron) — 3–7 dni samej pracy, 1–2 tygodnie z akceptacjami. Większa strona firmowa (8–15 podstron, blog, integracje) — 2–4 tygodnie. Sklep internetowy — 1–2 tygodnie pracy, 3–4 tygodnie z testami. Landing page — 1–5 dni. Dokładny termin podajemy po briefie." },
+  { q: "Czy mogę sam edytować treści po publikacji?", a: "Tak. Każda strona ma CMS — przy WordPress to klasyczny edytor, przy Next.js używamy Sanity lub Strapi. Drobne zmiany (literówka, zamiana zdjęcia, dodanie podstrony) robisz sam w 30 sekund. Po publikacji organizujemy szkolenie i przekazujemy dokumentację PDF." },
+  { q: "Next.js czy WordPress — co wybrać dla mojej firmy?", a: "Next.js gdy zależy Ci na maksymalnej szybkości, nowoczesnym wyglądzie i dobrym SEO bez kompromisów. WordPress gdy chcesz móc swobodnie dodawać dziesiątki podstron, masz redaktorów, którzy nie znają HTML, albo planujesz blog z bogatą strukturą kategorii. Decydujemy razem podczas briefu." },
+  { q: "Czy strona będzie działać dobrze na telefonie?", a: "Tak — projektujemy z myślą o mobile od pierwszego ekranu. Większość ruchu (60–80%) pochodzi z telefonów, więc tam zaczynamy. Każdy ekran sprawdzamy najpierw na mobile, dopiero potem na desktopie. Optymalizujemy Core Web Vitals (LCP, INP, CLS) na realnych urządzeniach." },
+  { q: "Co się dzieje po publikacji?", a: "3 miesiące gwarancji — naprawiamy bezpłatnie wszelkie błędy techniczne. Możesz też wejść w abonament utrzymania (od 199 zł/mies.): hosting, aktualizacje, kopie zapasowe, monitorowanie dostępności, drobne zmiany w treści. Albo abonament SEO (od 999 zł/mies.) — pozycjonowanie organiczne." },
+  { q: "Czy zachowamy pozycje w Google przy modernizacji starej strony?", a: "Tak, jeśli to dobrze zaplanujemy. Zachowujemy stare adresy URL gdzie się da, a tam gdzie zmieniamy — robimy przekierowania 301. Strukturę treści (nagłówki H1/H2, meta tagi, słowa kluczowe) zostawiamy. Po publikacji monitorujemy Search Console przez 4 tygodnie. Dobrze zaplanowana migracja często daje +5–15% ruchu." },
+  { q: "Czy obsługujecie klientów spoza Warszawy?", a: "Tak, pracujemy zdalnie z całej Polski. 80% naszych projektów to klienci spoza Warszawy. Komunikacja przez email, Slack, telefon, wideokonferencje. Spotkanie offline w Warszawie opcjonalnie — bez kosztów dojazdu." },
 ];
 
 const portfolioProjects = [
@@ -33,9 +36,9 @@ const portfolioProjects = [
 ];
 
 const stats = [
-  { val: 40, suffix: "+", label: "projektów" },
+  { val: 120, suffix: "+", label: "projektów" },
   { val: 96, suffix: "/100", label: "PSI score" },
-  { val: 3, suffix: " lata", label: "na rynku" },
+  { val: 12, suffix: " lat", label: "na rynku" },
   { val: 100, suffix: "%", label: "satysfakcji" },
 ];
 
@@ -350,10 +353,6 @@ const PARTICLES = Array.from({ length: 25 }, (_, i) => ({
 /* ─── Main page ──────────────────────────────────────────────── */
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const scrollSlider = (dir: 1 | -1) => {
-    sliderRef.current?.scrollBy({ left: dir * 380, behavior: "smooth" });
-  };
   useScrollReveal();
 
   return (
@@ -499,64 +498,50 @@ export default function Home() {
                 <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Portfolio</p>
                 <h2 className="text-4xl font-extrabold text-white">Realizacje</h2>
               </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => scrollSlider(-1)}
-                  aria-label="Poprzedni projekt"
-                  className="w-9 h-9 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center hover:border-blue-500/40 hover:bg-blue-500/10 transition-all"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <button
-                  onClick={() => scrollSlider(1)}
-                  aria-label="Następny projekt"
-                  className="w-9 h-9 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center hover:border-blue-500/40 hover:bg-blue-500/10 transition-all"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-                <a href="/realizacje" className="hidden sm:inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold text-sm transition-colors ml-2">
-                  Wszystkie projekty
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-                </a>
-              </div>
+              <a href="/realizacje" className="hidden sm:inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold text-sm transition-colors">
+                Wszystkie projekty
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+              </a>
             </div>
           </div>
 
-          {/* horizontal scroll container */}
-          <div ref={sliderRef} className="flex gap-5 overflow-x-auto pb-4 px-6 snap-x snap-mandatory" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-            <style>{`[data-slider]::-webkit-scrollbar { display: none; }`}</style>
-            {portfolioProjects.map((p, i) => (
-              <a key={p.slug} href={`/realizacje/${p.slug}`}
-                className="reveal flex-none w-[300px] md:w-[360px] glass rounded-2xl overflow-hidden group snap-start hover:no-underline"
-                style={{ transitionDelay: `${i * 70}ms` }}>
-                {/* real screenshot thumbnail */}
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={`/realizacje/${p.slug}-thumb.webp`}
-                    alt={`Realizacja — ${p.title}`}
-                    loading="lazy"
-                    decoding="async"
-                    width={820}
-                    height={615}
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
-                  />
-                </div>
-                <div className="p-5">
-                  <p className="text-xs text-slate-500 mb-1">{p.tag}</p>
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-white group-hover:text-blue-300 transition-colors">{p.title}</h3>
-                    <svg className="text-blue-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          {/* Infinite marquee — edge fades */}
+          <div className="relative overflow-hidden" aria-label="Realizacje — przewijanie automatyczne">
+            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-20 z-10" style={{ background: "linear-gradient(to right, #040913, transparent)" }} aria-hidden="true" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-20 z-10" style={{ background: "linear-gradient(to left, #040913, transparent)" }} aria-hidden="true" />
+
+            <div
+              className="flex gap-5 w-max pb-4"
+              style={{ animation: "marquee 40s linear infinite", paddingLeft: "20px" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.animationPlayState = "paused"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.animationPlayState = "running"; }}
+            >
+              {[...portfolioProjects, ...portfolioProjects].map((p, i) => (
+                <a
+                  key={i}
+                  href={`/realizacje/${p.slug}`}
+                  aria-hidden={i >= portfolioProjects.length ? "true" : undefined}
+                  tabIndex={i >= portfolioProjects.length ? -1 : undefined}
+                  className="flex-none w-[300px] glass rounded-2xl overflow-hidden group hover:no-underline hover:border-blue-500/30 transition-colors"
+                >
+                  <div className="h-44 overflow-hidden">
+                    <img
+                      src={`/realizacje/${p.slug}-thumb.webp`}
+                      alt={i < portfolioProjects.length ? `Realizacja — ${p.title}` : ""}
+                      loading="lazy"
+                      decoding="async"
+                      width={820}
+                      height={615}
+                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+                    />
                   </div>
-                </div>
-              </a>
-            ))}
-            {/* all projects card */}
-            <a href="/realizacje" className="flex-none w-[200px] glass rounded-2xl flex flex-col items-center justify-center gap-4 p-6 hover:no-underline group snap-start">
-              <div className="w-12 h-12 rounded-full border border-blue-500/30 bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-              </div>
-              <span className="text-sm font-semibold text-blue-400 group-hover:text-blue-300 transition-colors text-center">Wszystkie realizacje</span>
-            </a>
+                  <div className="p-4">
+                    <p className="text-xs text-slate-500 mb-1">{p.tag}</p>
+                    <h3 className="font-bold text-white group-hover:text-blue-300 transition-colors text-sm">{p.title}</h3>
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </section>
