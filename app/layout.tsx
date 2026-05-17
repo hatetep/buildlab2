@@ -34,10 +34,8 @@ const jsonLd = '{"@context":"https://schema.org","@type":"Organization","name":"
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pl" className={`${font.variable} h-full`} suppressHydrationWarning>
-      <head>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
-      </head>
       <body className="min-h-full mesh-bg grid-lines antialiased" style={{ fontFamily: "var(--font-jakarta), sans-serif" }} suppressHydrationWarning>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-full focus:font-semibold focus:outline-none">
           Przejdź do treści
         </a>
