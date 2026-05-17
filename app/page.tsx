@@ -1,5 +1,7 @@
-"use client";
-import { useState, useEffect, useRef } from "react";
+import HeroSphere from "@/components/home/HeroSphere";
+import Counter from "@/components/home/Counter";
+import PortfolioMarquee from "@/components/home/PortfolioMarquee";
+import FAQAccordion from "@/components/home/FAQAccordion";
 
 const services = [
   { icon: "⚡", title: "Nowoczesny Web Development", desc: "Strony i aplikacje zbudowane na Next.js, React i Astro. Ładują się w 1–2 sekundy, działają bez zarzutu.", tags: ["Next.js", "React", "TypeScript"], color: "from-blue-500/20 to-blue-600/5" },
@@ -15,358 +17,30 @@ const steps = [
   { num: "04", title: "Wdrożenie & Optymalizacja", desc: "Publikacja, szkolenie, SEO i monitoring. Nie zostawiamy Cię samego po starcie." },
 ];
 
-const faqs = [
-  { q: "Ile trwa wykonanie strony WWW?", a: "Strona wizytówka (do 5 podstron) — 3–7 dni samej pracy, 1–2 tygodnie z akceptacjami. Większa strona firmowa (8–15 podstron, blog, integracje) — 2–4 tygodnie. Sklep internetowy — 1–2 tygodnie pracy, 3–4 tygodnie z testami. Landing page — 1–5 dni. Dokładny termin podajemy po briefie." },
-  { q: "Czy mogę sam edytować treści po publikacji?", a: "Tak. Każda strona ma CMS — przy WordPress to klasyczny edytor, przy Next.js używamy Sanity lub Strapi. Drobne zmiany (literówka, zamiana zdjęcia, dodanie podstrony) robisz sam w 30 sekund. Po publikacji organizujemy szkolenie i przekazujemy dokumentację PDF." },
-  { q: "Next.js czy WordPress — co wybrać dla mojej firmy?", a: "Next.js gdy zależy Ci na maksymalnej szybkości, nowoczesnym wyglądzie i dobrym SEO bez kompromisów. WordPress gdy chcesz móc swobodnie dodawać dziesiątki podstron, masz redaktorów, którzy nie znają HTML, albo planujesz blog z bogatą strukturą kategorii. Decydujemy razem podczas briefu." },
-  { q: "Czy strona będzie działać dobrze na telefonie?", a: "Tak — projektujemy z myślą o mobile od pierwszego ekranu. Większość ruchu (60–80%) pochodzi z telefonów, więc tam zaczynamy. Każdy ekran sprawdzamy najpierw na mobile, dopiero potem na desktopie. Optymalizujemy Core Web Vitals (LCP, INP, CLS) na realnych urządzeniach." },
-  { q: "Co się dzieje po publikacji?", a: "3 miesiące gwarancji — naprawiamy bezpłatnie wszelkie błędy techniczne. Możesz też wejść w abonament utrzymania (od 199 zł/mies.): hosting, aktualizacje, kopie zapasowe, monitorowanie dostępności, drobne zmiany w treści. Albo abonament SEO (od 999 zł/mies.) — pozycjonowanie organiczne." },
-  { q: "Czy zachowamy pozycje w Google przy modernizacji starej strony?", a: "Tak, jeśli to dobrze zaplanujemy. Zachowujemy stare adresy URL gdzie się da, a tam gdzie zmieniamy — robimy przekierowania 301. Strukturę treści (nagłówki H1/H2, meta tagi, słowa kluczowe) zostawiamy. Po publikacji monitorujemy Search Console przez 4 tygodnie. Dobrze zaplanowana migracja często daje +5–15% ruchu." },
-  { q: "Czy obsługujecie klientów spoza Warszawy?", a: "Tak, pracujemy zdalnie z całej Polski. 80% naszych projektów to klienci spoza Warszawy. Komunikacja przez email, Slack, telefon, wideokonferencje. Spotkanie offline w Warszawie opcjonalnie — bez kosztów dojazdu." },
-];
-
-const portfolioProjects = [
-  { slug: "pisquare-pl",       title: "Pi Square",          tag: "Portfolio artystyczne",        year: "2026", thumb: "thumb" },
-  { slug: "alinahus-art",      title: "Alina Hus",           tag: "Portfolio artystyczne",        year: "2026", thumb: "thumb-sm" },
-  { slug: "pismoprocesowe-pl", title: "PismoProcesowe.pl",   tag: "Prawo / Landing page",         year: "2025", thumb: "thumb-sm" },
-  { slug: "secondlifeit-pl",   title: "SecondLifeIT.pl",     tag: "Technologia / Strona firmowa", year: "2025", thumb: "thumb-sm" },
-  { slug: "durres-pl",         title: "Durres.pl",           tag: "Nieruchomości / Strona firmowa", year: "2025", thumb: "thumb-sm" },
-  { slug: "inard-eu",          title: "Inard.eu",            tag: "E-commerce / Biżuteria",       year: "2024", thumb: "thumb-sm" },
-  { slug: "buildlab-pl",       title: "Buildlab.pl",         tag: "Agencja / Strona firmowa",     year: "2024", thumb: "thumb-sm" },
-];
-
 const stats = [
-  { val: 120, suffix: "+", label: "projektów" },
-  { val: 96, suffix: "/100", label: "PSI score" },
-  { val: 12, suffix: " lat", label: "na rynku" },
-  { val: 100, suffix: "%", label: "satysfakcji" },
+  { val: 120, suffix: "+",    label: "projektów" },
+  { val: 96,  suffix: "/100", label: "PSI score" },
+  { val: 12,  suffix: " lat", label: "na rynku" },
+  { val: 100, suffix: "%",    label: "satysfakcji" },
 ];
 
-/* ─── Scroll-reveal: each element watches itself ─────────────── */
-function useScrollReveal() {
-  useEffect(() => {
-    const els = document.querySelectorAll<HTMLElement>(".reveal");
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach(e => {
-        if (e.isIntersecting) {
-          (e.target as HTMLElement).classList.add("visible");
-          obs.unobserve(e.target);
-        }
-      }),
-      { threshold: 0.05 }
-    );
-    els.forEach(el => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
-}
-
-/* ─── Animated counter ───────────────────────────────────────── */
-function Counter({ target, suffix }: { target: number; suffix: string }) {
-  const [value, setValue] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const started = useRef(false);
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setValue(target);
-      return;
-    }
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !started.current) {
-        started.current = true;
-        const dur = 1800, t0 = performance.now();
-        const tick = (now: number) => {
-          const p = Math.min((now - t0) / dur, 1);
-          setValue(Math.round((1 - Math.pow(1 - p, 3)) * target));
-          if (p < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-        obs.disconnect();
-      }
-    }, { threshold: 0.5 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [target]);
-  return <div ref={ref}>{value}{suffix}</div>;
-}
-
-/* ─── Hero: Canvas 3D rotating sphere network ────────────────────
-   60fps requestAnimationFrame, Fibonacci sphere distribution,
-   perspective projection, depth-sorted rendering, shadowBlur glow.
-   Matches the Stitch "Ultra-Modern Digital Agency" node-network.
-──────────────────────────────────────────────────────────────── */
-function HeroSphere() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafRef    = useRef<number>(0);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    if (!canvas.offsetParent) return; // hidden on mobile (parent has display:none)
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const DPR = Math.min(window.devicePixelRatio || 1, 2);
-    const S = 480;
-    canvas.width  = S * DPR;
-    canvas.height = S * DPR;
-    ctx.scale(DPR, DPR);
-    const cx = S / 2, cy = S / 2, R = 168;
-
-    /* Fibonacci sphere — 52 nodes evenly distributed */
-    const N = 52;
-    const φ = Math.PI * (3 - Math.sqrt(5));
-    const base = Array.from({ length: N }, (_, i) => {
-      const y  = 1 - (i / (N - 1)) * 2;
-      const r  = Math.sqrt(Math.max(0, 1 - y * y));
-      const th = φ * i;
-      return { x: Math.cos(th) * r, y, z: Math.sin(th) * r };
-    });
-
-    /* Pre-compute connections — nodes within arc-distance threshold */
-    const THR = 0.60;
-    const conns: [number, number][] = [];
-    for (let i = 0; i < N; i++)
-      for (let j = i + 1; j < N; j++) {
-        const a = base[i], b = base[j];
-        if (Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) < THR)
-          conns.push([i, j]);
-      }
-
-    /* Perspective projection helper */
-    const project = (x: number, y: number, z: number) => {
-      const fov = 4.2;
-      const sc  = fov / (fov + z * 0.75);
-      return { px: cx + x * R * sc, py: cy + y * R * sc, sc, z };
-    };
-
-    let angle = 0;
-    let tiltY  = 0.18; // slight Y tilt for 3-D feel
-
-    const draw = () => {
-      ctx.clearRect(0, 0, S, S);
-
-      /* Slow Y rotation */
-      angle += 0.0025;
-
-      /* Rotate nodes */
-      const ca = Math.cos(angle), sa = Math.sin(angle);
-      const ct = Math.cos(tiltY),  st = Math.sin(tiltY);
-      const rot = base.map(n => {
-        // Y-axis rotation
-        const x1 =  n.x * ca + n.z * sa;
-        const z1 = -n.x * sa + n.z * ca;
-        // slight X-axis tilt
-        const y2 =  n.y * ct - z1 * st;
-        const z2 =  n.y * st + z1 * ct;
-        return { x: x1, y: y2, z: z2 };
-      });
-
-      const proj = rot.map(n => project(n.x, n.y, n.z));
-
-      /* ── 1. Central radial glow ── */
-      const bgGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 210);
-      bgGlow.addColorStop(0,   "rgba(59,130,246,0.10)");
-      bgGlow.addColorStop(0.4, "rgba(99,102,241,0.06)");
-      bgGlow.addColorStop(1,   "transparent");
-      ctx.fillStyle = bgGlow;
-      ctx.fillRect(0, 0, S, S);
-
-      /* ── 2. Outer violet bloom ── */
-      const bloom = ctx.createRadialGradient(cx + 30, cy - 30, 0, cx, cy, 260);
-      bloom.addColorStop(0,   "rgba(139,92,246,0.07)");
-      bloom.addColorStop(1,   "transparent");
-      ctx.fillStyle = bloom;
-      ctx.fillRect(0, 0, S, S);
-
-      /* ── 3. Edges (back to front by avg Z) ── */
-      const connsSorted = [...conns].sort(([i, j], [k, l]) =>
-        (rot[i].z + rot[j].z) - (rot[k].z + rot[l].z)
-      );
-
-      connsSorted.forEach(([i, j]) => {
-        const a = proj[i], b = proj[j];
-        const avgZ = (rot[i].z + rot[j].z) / 2;
-        const vis  = Math.max(0, (avgZ + 1) / 2);
-        if (vis < 0.05) return;
-
-        const g = ctx.createLinearGradient(a.px, a.py, b.px, b.py);
-        const blue   = `rgba(59,130,246,${vis * 0.75})`;
-        const violet = `rgba(139,92,246,${vis * 0.55})`;
-        g.addColorStop(0,   violet);
-        g.addColorStop(0.5, blue);
-        g.addColorStop(1,   violet);
-
-        ctx.beginPath();
-        ctx.moveTo(a.px, a.py);
-        ctx.lineTo(b.px, b.py);
-        ctx.strokeStyle = g;
-        ctx.lineWidth   = vis * 1.4;
-        ctx.stroke();
-      });
-
-      /* ── 4. Nodes (depth sorted, back to front) ── */
-      const order = rot.map((_, i) => i).sort((a, b) => rot[a].z - rot[b].z);
-
-      order.forEach(i => {
-        const p  = proj[i];
-        const d  = Math.max(0, (rot[i].z + 1) / 2); // 0=back, 1=front
-        const nr = p.sc * 7 + 2;
-
-        /* Color: front=blue, mid=indigo, back=violet */
-        const col = d > 0.65
-          ? [59, 130, 246]
-          : d > 0.35
-          ? [99, 102, 241]
-          : [139, 92, 246];
-        const [cr, cg, cb] = col;
-
-        const opacity = d * 0.55 + 0.38;
-
-        /* Outer glow ring */
-        ctx.save();
-        ctx.shadowBlur  = d * 24 + 6;
-        ctx.shadowColor = `rgba(${cr},${cg},${cb},0.9)`;
-
-        ctx.beginPath();
-        ctx.arc(p.px, p.py, nr * 1.9, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${cr},${cg},${cb},${d * 0.08})`;
-        ctx.fill();
-
-        /* Core sphere */
-        ctx.beginPath();
-        ctx.arc(p.px, p.py, nr, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${cr},${cg},${cb},${opacity})`;
-        ctx.fill();
-        ctx.restore();
-
-        /* Specular highlight */
-        ctx.beginPath();
-        ctx.arc(p.px - nr * 0.28, p.py - nr * 0.3, nr * 0.34, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${d * 0.5})`;
-        ctx.fill();
-      });
-
-      /* ── 5. Centre bright core ── */
-      const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, 50);
-      core.addColorStop(0,   "rgba(120,160,255,0.18)");
-      core.addColorStop(1,   "transparent");
-      ctx.fillStyle = core;
-      ctx.fillRect(0, 0, S, S);
-
-      /* ── 6. Platform glow bottom ── */
-      const plat = ctx.createRadialGradient(cx, cy + R * 0.85, 0, cx, cy + R * 0.85, 130);
-      plat.addColorStop(0,   "rgba(59,130,246,0.35)");
-      plat.addColorStop(0.5, "rgba(99,102,241,0.12)");
-      plat.addColorStop(1,   "transparent");
-      ctx.fillStyle = plat;
-      ctx.fillRect(0, 0, S, S);
-
-      rafRef.current = requestAnimationFrame(draw);
-    };
-
-    draw();
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  return (
-    <div className="relative" style={{ width: 480, height: 480, maxWidth: "100%" }} aria-hidden="true">
-      <canvas
-        ref={canvasRef}
-        style={{ width: 480, height: 480, display: "block" }}
-      />
-
-      {/* Floating UI badges — CSS-positioned over canvas */}
-      <div style={{ position:"absolute", top:"6%", right:"4%", animation:"float 5s ease-in-out 0.4s infinite" }}>
-        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(59,130,246,0.55)", borderRadius:10, padding:"8px 14px", backdropFilter:"blur(14px)", boxShadow:"0 8px 32px rgba(0,0,0,0.55), 0 0 14px rgba(59,130,246,0.18)" }}>
-          <div style={{ fontSize:8, color:"rgba(148,163,184,0.55)", marginBottom:4, fontFamily:"monospace" }}>PageSpeed Insights</div>
-          <div style={{ display:"flex", alignItems:"baseline", gap:4 }}>
-            <span style={{ fontSize:22, fontWeight:800, color:"#22c55e", fontFamily:"monospace", lineHeight:1 }}>96</span>
-            <span style={{ fontSize:9, color:"rgba(74,222,128,0.7)" }}>/100</span>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ position:"absolute", bottom:"3%", left:"2%", animation:"float 6.5s ease-in-out 1.2s infinite" }}>
-        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(139,92,246,0.45)", borderRadius:10, padding:"9px 13px", backdropFilter:"blur(14px)", boxShadow:"0 8px 32px rgba(0,0,0,0.5)" }}>
-          <div style={{ fontSize:8, color:"rgba(148,163,184,0.5)", marginBottom:5, fontFamily:"monospace" }}>Tech Stack</div>
-          {[["Next.js","#93c5fd"],["TypeScript","#a78bfa"],["Tailwind","#67e8f9"]].map(([t,c]) => (
-            <div key={t} style={{ fontSize:9, color:c, fontFamily:"monospace", lineHeight:1.9 }}>▸ {t}</div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ position:"absolute", top:"38%", right:"-2%", animation:"float 4.8s ease-in-out 2s infinite" }}>
-        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(34,197,94,0.4)", borderRadius:8, padding:"6px 11px", backdropFilter:"blur(12px)", display:"flex", alignItems:"center", gap:7 }}>
-          <div style={{ width:7, height:7, borderRadius:"50%", background:"#22c55e", boxShadow:"0 0 8px rgba(34,197,94,0.8)" }} />
-          <span style={{ fontSize:10, color:"#4ade80", fontFamily:"monospace", fontWeight:600 }}>Live deploy</span>
-        </div>
-      </div>
-
-      <div style={{ position:"absolute", top:"16%", left:"3%", animation:"float 5.8s ease-in-out 0.8s infinite" }}>
-        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(99,102,241,0.4)", borderRadius:8, padding:"6px 11px", backdropFilter:"blur(12px)" }}>
-          <span style={{ fontSize:9, color:"#818cf8", fontFamily:"monospace", fontWeight:600 }}>SEO ✦ Core Web Vitals</span>
-        </div>
-      </div>
-
-      {/* Cloudflare CDN */}
-      <div style={{ position:"absolute", bottom:"8%", right:"5%", animation:"float 7s ease-in-out 1.8s infinite" }}>
-        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(249,115,22,0.4)", borderRadius:10, padding:"7px 13px", backdropFilter:"blur(14px)", boxShadow:"0 6px 24px rgba(0,0,0,0.5)" }}>
-          <div style={{ fontSize:8, color:"rgba(148,163,184,0.5)", marginBottom:4, fontFamily:"monospace" }}>CDN / Edge</div>
-          <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-            <div style={{ width:6, height:6, borderRadius:"50%", background:"#fb923c", boxShadow:"0 0 6px rgba(251,146,60,0.8)" }} />
-            <span style={{ fontSize:10, color:"#fb923c", fontFamily:"monospace", fontWeight:700 }}>Cloudflare Pages</span>
-          </div>
-        </div>
-      </div>
-
-      {/* LCP metric */}
-      <div style={{ position:"absolute", top:"55%", left:"-2%", animation:"float 6.2s ease-in-out 3s infinite" }}>
-        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(34,197,94,0.35)", borderRadius:10, padding:"8px 13px", backdropFilter:"blur(14px)" }}>
-          <div style={{ fontSize:8, color:"rgba(148,163,184,0.5)", marginBottom:3, fontFamily:"monospace" }}>Largest Contentful Paint</div>
-          <div style={{ display:"flex", alignItems:"baseline", gap:3 }}>
-            <span style={{ fontSize:18, fontWeight:800, color:"#22c55e", fontFamily:"monospace", lineHeight:1 }}>0.9</span>
-            <span style={{ fontSize:9, color:"rgba(74,222,128,0.7)" }}>s</span>
-          </div>
-        </div>
-      </div>
-
-      {/* CI/CD pipeline */}
-      <div style={{ position:"absolute", top:"2%", left:"28%", animation:"float 5.4s ease-in-out 0.3s infinite" }}>
-        <div style={{ background:"rgba(4,9,19,0.90)", border:"1px solid rgba(148,163,184,0.2)", borderRadius:8, padding:"6px 12px", backdropFilter:"blur(12px)", display:"flex", alignItems:"center", gap:6 }}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
-          <span style={{ fontSize:9, color:"#94a3b8", fontFamily:"monospace", fontWeight:600 }}>CI/CD · git push → deploy</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Floating background particles ─────────────────────────── */
 const PARTICLES = Array.from({ length: 25 }, (_, i) => ({
   id: i,
   left: `${3 + (i * 3.9) % 94}%`,
-  top: `${8 + (i * 6.1) % 84}%`,
+  top:  `${8 + (i * 6.1) % 84}%`,
   size: 1 + (i % 3),
   delay: `${(i * 0.35) % 5}s`,
-  dur: `${5 + (i % 4) * 1.5}s`,
-  op: 0.12 + (i % 5) * 0.06,
+  dur:   `${5 + (i % 4) * 1.5}s`,
+  op:    0.12 + (i % 5) * 0.06,
 }));
 
-/* ─── Main page ──────────────────────────────────────────────── */
 export default function Home() {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [marquePaused, setMarquePaused] = useState(false);
-  useScrollReveal();
-
   return (
     <div className="relative z-10">
 
       {/* ══ HERO ══════════════════════════════════════════════ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
 
-        {/* background particles */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
           {PARTICLES.map(p => (
             <div key={p.id} className="absolute rounded-full bg-blue-400"
@@ -374,7 +48,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* large ambient blobs */}
         <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] pointer-events-none" aria-hidden="true"
           style={{ background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", filter: "blur(60px)" }} />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] pointer-events-none" aria-hidden="true"
@@ -383,7 +56,6 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-6 pt-24 pb-16 relative z-10 w-full">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-            {/* LEFT — copy */}
             <div>
               <div className="hero-animate hero-animate-1">
                 <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm text-blue-300 mb-8 badge-pulse">
@@ -415,7 +87,6 @@ export default function Home() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
               </div>
-              {/* animated stats */}
               <div className="hero-animate hero-animate-5 mt-12 flex flex-wrap gap-8 justify-center sm:justify-start">
                 {stats.map(s => (
                   <div key={s.label}>
@@ -426,14 +97,12 @@ export default function Home() {
               </div>
             </div>
 
-            {/* RIGHT — 3D tech visual */}
             <div className="hidden lg:flex relative h-[480px] items-center justify-center hero-animate hero-animate-3">
               <HeroSphere />
             </div>
           </div>
         </div>
 
-        {/* scroll arrow */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2" aria-hidden="true">
           <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, transparent, rgba(59,130,246,0.6), transparent)", animation: "float 2s ease-in-out infinite", margin: "0 auto" }} />
         </div>
@@ -442,27 +111,25 @@ export default function Home() {
       {/* ══ SERVICES ══════════════════════════════════════════ */}
       <section id="uslugi" className="py-24 relative z-10">
         <div className="mx-auto max-w-6xl px-6">
-          <div>
-            <div className="reveal text-center mb-16">
-              <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Co robimy</p>
-              <h2 className="text-4xl font-extrabold text-white mb-4">Nasze usługi — <span className="grad-text">Technologia | Design</span></h2>
-              <p className="text-slate-400 max-w-xl mx-auto">Kompleksowa obsługa cyfrowa — od pierwszego szkicu do działającego produktu.</p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-              {services.map((s, i) => (
-                <article key={s.title} className="reveal glass rounded-2xl p-6 group relative overflow-hidden" style={{ transitionDelay: `${i * 100}ms` }}>
-                  <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${s.color}`} aria-hidden="true" />
-                  <div className="text-3xl mb-4" aria-hidden="true">{s.icon}</div>
-                  <h3 className="font-bold text-white mb-3 text-lg">{s.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed mb-4">{s.desc}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {s.tags.map(t => <span key={t} className="rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-xs text-blue-300">{t}</span>)}
-                  </div>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-500"
-                    style={{ background: "linear-gradient(105deg,transparent 40%,rgba(59,130,246,0.05) 50%,transparent 60%)", backgroundSize: "200% 100%", animation: "shimmer 2s ease-in-out infinite" }} aria-hidden="true" />
-                </article>
-              ))}
-            </div>
+          <div className="reveal text-center mb-16">
+            <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Co robimy</p>
+            <h2 className="text-4xl font-extrabold text-white mb-4">Nasze usługi — <span className="grad-text">Technologia | Design</span></h2>
+            <p className="text-slate-400 max-w-xl mx-auto">Kompleksowa obsługa cyfrowa — od pierwszego szkicu do działającego produktu.</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {services.map((s, i) => (
+              <article key={s.title} className="reveal glass rounded-2xl p-6 group relative overflow-hidden" style={{ transitionDelay: `${i * 100}ms` }}>
+                <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${s.color}`} aria-hidden="true" />
+                <div className="text-3xl mb-4" aria-hidden="true">{s.icon}</div>
+                <h3 className="font-bold text-white mb-3 text-lg">{s.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed mb-4">{s.desc}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {s.tags.map(t => <span key={t} className="rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-xs text-blue-300">{t}</span>)}
+                </div>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-500"
+                  style={{ background: "linear-gradient(105deg,transparent 40%,rgba(59,130,246,0.05) 50%,transparent 60%)", backgroundSize: "200% 100%", animation: "shimmer 2s ease-in-out infinite" }} aria-hidden="true" />
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -470,159 +137,58 @@ export default function Home() {
       {/* ══ PROCESS ═══════════════════════════════════════════ */}
       <section id="proces" className="py-24 relative z-10">
         <div className="mx-auto max-w-6xl px-6">
-          <div>
-            <div className="reveal text-center mb-16">
-              <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Jak pracujemy</p>
-              <h2 className="text-4xl font-extrabold text-white">Proces w <span className="grad-text">4 krokach</span></h2>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {steps.map((s, i) => (
-                <div key={s.num} className="reveal relative" style={{ transitionDelay: `${i * 120}ms` }}>
-                  {i < steps.length - 1 && (
-                    <div className="hidden lg:block absolute top-10 left-full w-full h-px z-10" aria-hidden="true"
-                      style={{ background: "linear-gradient(90deg, rgba(59,130,246,0.4), rgba(99,102,241,0.08))" }} />
-                  )}
-                  <div className="glass rounded-2xl p-6 h-full group">
-                    <div className="text-5xl font-black grad-text-blue mb-4 inline-block group-hover:scale-110 transition-transform" aria-hidden="true">{s.num}</div>
-                    <h3 className="font-bold text-white mb-2">{s.title}</h3>
-                    <p className="text-slate-400 text-sm leading-relaxed">{s.desc}</p>
-                  </div>
+          <div className="reveal text-center mb-16">
+            <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Jak pracujemy</p>
+            <h2 className="text-4xl font-extrabold text-white">Proces w <span className="grad-text">4 krokach</span></h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {steps.map((s, i) => (
+              <div key={s.num} className="reveal relative" style={{ transitionDelay: `${i * 120}ms` }}>
+                {i < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-10 left-full w-full h-px z-10" aria-hidden="true"
+                    style={{ background: "linear-gradient(90deg, rgba(59,130,246,0.4), rgba(99,102,241,0.08))" }} />
+                )}
+                <div className="glass rounded-2xl p-6 h-full group">
+                  <div className="text-5xl font-black grad-text-blue mb-4 inline-block group-hover:scale-110 transition-transform" aria-hidden="true">{s.num}</div>
+                  <h3 className="font-bold text-white mb-2">{s.title}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">{s.desc}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ REALIZACJE — horizontal scroll ════════════════════ */}
-      <section id="realizacje" className="py-24 relative z-10 overflow-hidden">
-        <div>
-          <div className="reveal mx-auto max-w-6xl px-6 mb-10">
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Portfolio</p>
-                <h2 className="text-4xl font-extrabold text-white">Realizacje</h2>
               </div>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setMarquePaused(p => !p)}
-                  className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/10 hover:border-blue-500/40 px-4 py-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
-                  aria-label={marquePaused ? "Wznów przewijanie portfolio" : "Zatrzymaj przewijanie portfolio"}
-                >
-                  {marquePaused
-                    ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>Wznów</>
-                    : <><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Pauza</>
-                  }
-                </button>
-                <a href="/realizacje" className="hidden sm:inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold text-sm transition-colors">
-                  Wszystkie projekty
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Infinite marquee — edge fades */}
-          <div className="relative overflow-hidden" aria-label="Realizacje — przewijanie automatyczne">
-            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-20 z-10" style={{ background: "linear-gradient(to right, #040913, transparent)" }} aria-hidden="true" />
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-20 z-10" style={{ background: "linear-gradient(to left, #040913, transparent)" }} aria-hidden="true" />
-
-            <div
-              className="flex gap-5 w-max pb-4"
-              style={{ animation: "marquee 40s linear infinite", animationPlayState: marquePaused ? "paused" : "running", paddingLeft: "20px" }}
-              onMouseEnter={e => { if (!marquePaused) (e.currentTarget as HTMLDivElement).style.animationPlayState = "paused"; }}
-              onMouseLeave={e => { if (!marquePaused) (e.currentTarget as HTMLDivElement).style.animationPlayState = "running"; }}
-            >
-              {[...portfolioProjects, ...portfolioProjects].map((p, i) => (
-                <a
-                  key={i}
-                  href={`/realizacje/${p.slug}`}
-                  aria-hidden={i >= portfolioProjects.length ? "true" : undefined}
-                  tabIndex={i >= portfolioProjects.length ? -1 : undefined}
-                  className="flex-none w-[300px] glass rounded-2xl overflow-hidden group hover:no-underline hover:border-blue-500/30 transition-colors"
-                >
-                  <div className="h-44 overflow-hidden">
-                    <img
-                      src={`/realizacje/${p.slug}-${p.thumb}.webp`}
-                      alt={i < portfolioProjects.length ? `Realizacja — ${p.title}` : ""}
-                      loading="lazy"
-                      decoding="async"
-                      width={400}
-                      height={300}
-                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <p className="text-xs text-slate-400 mb-1">{p.tag}</p>
-                    <h3 className="font-bold text-white group-hover:text-blue-300 transition-colors text-sm">{p.title}</h3>
-                  </div>
-                </a>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ══ FAQ ═══════════════════════════════════════════════ */}
-      <section id="faq" className="py-24 relative z-10">
-        <div className="mx-auto max-w-3xl px-6">
-          <div>
-            <div className="reveal text-center mb-12">
-              <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">Pytania</p>
-              <h2 className="text-4xl font-extrabold text-white">FAQ</h2>
-            </div>
-            <dl className="space-y-3">
-              {faqs.map((f, i) => (
-                <div key={i} className="reveal glass rounded-2xl overflow-hidden" style={{ transitionDelay: `${i * 80}ms` }}>
-                  <dt>
-                    <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      id={`faq-question-${i}`}
-                      className="w-full flex items-center justify-between px-6 py-5 text-left font-semibold text-white hover:text-blue-300 transition-colors"
-                      aria-expanded={openFaq === i} aria-controls={`faq-answer-${i}`}>
-                      {f.q}
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                        className={`flex-shrink-0 ml-4 transition-transform duration-300 ${openFaq === i ? "rotate-180" : ""}`} aria-hidden="true">
-                        <polyline points="6 9 12 15 18 9"/>
-                      </svg>
-                    </button>
-                  </dt>
-                  <dd id={`faq-answer-${i}`}
-                    hidden={openFaq !== i} className="px-6 pb-5 text-slate-400 leading-relaxed text-sm border-t border-white/5">
-                    <div className="pt-4">{f.a}</div>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </div>
-      </section>
+      {/* ══ REALIZACJE — marquee (client island) ══════════════ */}
+      <PortfolioMarquee />
+
+      {/* ══ FAQ (client island) ═══════════════════════════════ */}
+      <FAQAccordion />
 
       {/* ══ CTA ═══════════════════════════════════════════════ */}
       <section className="py-24 relative z-10">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <div>
-            <div className="reveal glass rounded-3xl p-12 md:p-16 relative overflow-hidden">
-              <div className="absolute inset-0 rounded-3xl pointer-events-none" aria-hidden="true"
-                style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.18) 0%, transparent 65%)", animation: "orb-pulse 5s ease-in-out infinite" }} />
-              <div className="absolute top-4 right-6 flex gap-1.5" aria-hidden="true">
-                <div className="w-2 h-2 rounded-full bg-blue-500/40" />
-                <div className="w-2 h-2 rounded-full bg-violet-500/40" />
-                <div className="w-2 h-2 rounded-full bg-pink-500/40" />
-              </div>
-              <div className="relative z-10">
-                <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-4">Zacznijmy razem</p>
-                <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
-                  Kontakt w sprawie<br /><span className="grad-text">nowego projektu</span>
-                </h2>
-                <p className="text-slate-400 mb-8 max-w-lg mx-auto leading-relaxed">
-                  Powiedz nam o swoim projekcie — odezwiemy się w ciągu 24 godzin z bezpłatną wyceną.
-                </p>
-                <a href="/kontakt"
-                  className="inline-flex items-center gap-2 rounded-full bg-blue-600 hover:bg-blue-500 px-10 py-4 text-base font-bold text-white transition-all duration-200 glow-btn">
-                  Napisz do nas
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </a>
-              </div>
+          <div className="reveal glass rounded-3xl p-12 md:p-16 relative overflow-hidden">
+            <div className="absolute inset-0 rounded-3xl pointer-events-none" aria-hidden="true"
+              style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.18) 0%, transparent 65%)", animation: "orb-pulse 5s ease-in-out infinite" }} />
+            <div className="absolute top-4 right-6 flex gap-1.5" aria-hidden="true">
+              <div className="w-2 h-2 rounded-full bg-blue-500/40" />
+              <div className="w-2 h-2 rounded-full bg-violet-500/40" />
+              <div className="w-2 h-2 rounded-full bg-pink-500/40" />
+            </div>
+            <div className="relative z-10">
+              <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-4">Zacznijmy razem</p>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
+                Kontakt w sprawie<br /><span className="grad-text">nowego projektu</span>
+              </h2>
+              <p className="text-slate-400 mb-8 max-w-lg mx-auto leading-relaxed">
+                Powiedz nam o swoim projekcie — odezwiemy się w ciągu 24 godzin z bezpłatną wyceną.
+              </p>
+              <a href="/kontakt"
+                className="inline-flex items-center gap-2 rounded-full bg-blue-600 hover:bg-blue-500 px-10 py-4 text-base font-bold text-white transition-all duration-200 glow-btn">
+                Napisz do nas
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
             </div>
           </div>
         </div>
