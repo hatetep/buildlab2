@@ -27,7 +27,7 @@ export default function PortfolioMarquee() {
               <button
                 onClick={() => setMarquePaused(p => !p)}
                 className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/10 hover:border-blue-500/40 px-4 py-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
-                aria-label={marquePaused ? "Wznów przewijanie portfolio" : "Zatrzymaj przewijanie portfolio"}
+                aria-label={marquePaused ? "Wznów przewijanie portfolio" : "Pauza — zatrzymaj przewijanie portfolio"}
               >
                 {marquePaused
                   ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>Wznów</>
