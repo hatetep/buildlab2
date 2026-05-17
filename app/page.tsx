@@ -416,7 +416,7 @@ export default function Home() {
                 </a>
               </div>
               {/* animated stats */}
-              <div className="hero-animate hero-animate-5 mt-12 flex flex-wrap gap-8">
+              <div className="hero-animate hero-animate-5 mt-12 flex flex-wrap gap-8 justify-center sm:justify-start">
                 {stats.map(s => (
                   <div key={s.label}>
                     <p className="text-3xl font-bold grad-text-blue"><Counter target={s.val} suffix={s.suffix} /></p>
